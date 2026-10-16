@@ -1,0 +1,38 @@
+[package]
+name = "thekes"
+version = "1.0.0"
+authors = ["Jorge Brunal <diniremix@gmail.com>"]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+description = "the place where books are kept, made with GPUi-Kit"
+readme = "README.md"
+homepage = "https://github.com/HomeInside/thekes"
+repository = "https://github.com/HomeInside/thekes"
+keywords = ["thekes", "gpui-kit", "books"]
+categories = ["gui", "gpui-kit", "books"]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+build = "build.rs"
+
+[dependencies]
+gpui-kit = "=0.7.0"
+
+[profile.dev]
+opt-level = 0
+# Disabling debug info speeds up builds a bunch and we don't rely on it for debugging that much.
+debug = 0
+
+[profile.release]
+lto = true
+opt-level = 2
+strip = true
+debug = false
+panic = "abort"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = true
+
+[build-dependencies]
+semver = "~1.0.28"
