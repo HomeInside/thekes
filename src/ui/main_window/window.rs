@@ -23,6 +23,7 @@ pub struct MainWindow {
     pub(crate) color_config: ColorConfig,
 }
 
+// métodos
 impl MainWindow {
     pub fn new(_window: &mut Window, cx: &mut Context<Self>) -> Self {
         let sidebar = cx.new(|_| AppSidebar::new());
@@ -44,6 +45,37 @@ impl MainWindow {
             color_config: ColorConfig::default(),
         }
     }
+
+    // TO REMOVE
+    pub fn load_books(&mut self, _cx: &mut Context<Self>) -> impl IntoElement {
+        if self.loading {
+            return div().child("Cargando libros...");
+        }
+        div().child("Todos los libros")
+    }
+
+    // TO REMOVE
+    pub fn load_authors(&mut self, _cx: &mut Context<Self>) -> impl IntoElement {
+        div().child("Autores")
+    }
+
+    // TO REMOVE
+    pub fn load_notes(&mut self, _cx: &mut Context<Self>) -> impl IntoElement {
+        div().child("Anotaciones")
+    }
+
+    // TO REMOVE
+    pub fn load_active_module(&mut self, cx: &mut Context<Self>) -> impl IntoElement {
+        //println!("load_active_panel fn: {:?}", self.active_module);
+
+        match self.active_module {
+            ActiveModule::Dashboard => self.dashboard.clone().into_any_element(),
+            ActiveModule::Books => self.load_books(cx).into_any_element(),
+            ActiveModule::Authors => self.load_authors(cx).into_any_element(),
+            ActiveModule::Notes => self.load_notes(cx).into_any_element(),
+            _ => div().child("nada aun").into_any_element(),
+        }
+    } //load_active_panel
 }
 
 impl Render for MainWindow {
