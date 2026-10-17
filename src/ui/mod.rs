@@ -1,5 +1,5 @@
-mod authors;
-mod books;
+pub mod authors;
+pub mod books;
 pub mod dashboard;
 pub mod main_window;
 mod notes;

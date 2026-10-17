@@ -11,7 +11,6 @@ pub struct Dashboard {
     dash_config: ColorConfig,
 }
 
-// render
 impl Render for Dashboard {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         //
@@ -146,7 +145,7 @@ impl Render for Dashboard {
     }
 }
 
-// metodos
+// métodos
 impl Dashboard {
     pub fn new() -> Self {
         Self {

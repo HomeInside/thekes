@@ -1,8 +1,5 @@
-use super::subcriptions::ActiveModule;
 use gpui_kit::Context;
-use gpui_kit::IntoElement;
 use gpui_kit::component::{Theme, ThemeMode};
-use gpui_kit::*;
 
 use super::MainWindow;
 
