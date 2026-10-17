@@ -190,7 +190,6 @@ impl MainWindow {
     // TO CHECK
     pub fn load_active_module(&mut self, cx: &mut Context<Self>) -> impl IntoElement {
         //println!("load_active_module fn: {:?}", self.active_module);
-
         match self.active_module {
             ActiveModule::Dashboard => self.dashboard.clone().into_any_element(),
             ActiveModule::Books => self.books.clone().into_any_element(),

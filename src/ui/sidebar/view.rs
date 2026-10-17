@@ -249,6 +249,12 @@ impl AppSidebar {
     }
 
     pub fn click_module_change(&mut self, toogle_module: ActiveModule, cx: &mut Context<Self>) {
+        // evita recargar si el módulo ya está activo
+        if self.active_item == toogle_module {
+            println!("no se emite event, ya que es el mismo");
+            return;
+        }
+
         self.active_item = toogle_module;
 
         println!("enviando event NavigateTo: {:?}", self.active_item);
