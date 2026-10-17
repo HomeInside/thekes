@@ -1,17 +1,62 @@
 // hide console window on Windows in release builds
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use gpui_kit::assets::Assets;
+use gpui_kit::assets::{Assets as ComponentAssets, icon_assets};
 use gpui_kit::component::TitleBar;
 use gpui_kit::*;
+use std::borrow::Cow;
 
 mod ui;
 mod utils;
 use crate::ui::main_window::MainWindow;
 use crate::utils::consts;
 
+icon_assets!(
+    ExtraIcons,
+    [
+        LibraryBig,
+        Users,
+        Book,
+        Bookmark,
+        BookCheck,
+        CircleCheckBig,
+        NotebookPen,
+        //
+        BookHeart,
+        BookOpenCheck,
+        ListTodo,
+        SquareLibrary,
+        TimerReset,
+        Palette,
+        MoonStar,
+        //
+        //BookBookmark, // no existe aun
+        Accessibility,
+        AlarmClock
+    ]
+);
+struct AppAssets;
+
+// from https://gpui-kit.com/docs/assets/#pick-additional-catalog-icons-with-icon_assets
+impl AssetSource for AppAssets {
+    fn load(&self, path: &str) -> Result<Option<Cow<'static, [u8]>>> {
+        if let Some(bytes) = ExtraIcons.load(path)? {
+            return Ok(Some(bytes));
+        }
+        ComponentAssets.load(path)
+    }
+
+    fn list(&self, path: &str) -> Result<Vec<SharedString>> {
+        let mut paths = ComponentAssets.list(path)?;
+        paths.extend(ExtraIcons.list(path)?);
+        paths.sort();
+        paths.dedup();
+        Ok(paths)
+    }
+}
+
 fn main() {
-    let app = gpui_kit::application().with_assets(Assets);
+    let app = gpui_kit::application().with_assets(AppAssets);
 
     app.run(move |cx| {
         gpui_kit::init(cx);
@@ -32,6 +77,6 @@ fn main() {
 
             cx.new(|cx| MainWindow::new(window, cx))
         })
-        .expect("Failed to open main window");
+            .expect("Failed to open main window");
     });
 }
