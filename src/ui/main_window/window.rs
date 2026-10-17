@@ -1,5 +1,7 @@
 use super::ColorConfig;
 use super::subcriptions::{ActiveModule, NavigateTo};
+use crate::ui::authors::Authors;
+use crate::ui::books::Books;
 use crate::ui::dashboard::Dashboard;
 use crate::ui::sidebar::AppSidebar;
 use crate::utils::consts;
@@ -18,64 +20,11 @@ pub struct MainWindow {
     pub(crate) toggle_theme: bool,
     sidebar: Entity<AppSidebar>,
     pub(crate) dashboard: Entity<Dashboard>,
+    pub(crate) books: Entity<Books>,
+    pub(crate) authors: Entity<Authors>,
     _sidebar_subscription: Subscription,
     pub(crate) active_module: ActiveModule,
     pub(crate) color_config: ColorConfig,
-}
-
-// métodos
-impl MainWindow {
-    pub fn new(_window: &mut Window, cx: &mut Context<Self>) -> Self {
-        let sidebar = cx.new(|_| AppSidebar::new());
-        let dashboard = cx.new(|_| Dashboard::new());
-
-        let subscription = cx.subscribe(&sidebar, |this, _sidebar, event: &NavigateTo, cx| {
-            println!("llegó desde NavigateTo");
-            this.active_module = event.module;
-            cx.notify();
-        });
-
-        Self {
-            loading: true,
-            toggle_theme: true,
-            sidebar,
-            dashboard,
-            _sidebar_subscription: subscription,
-            active_module: ActiveModule::Dashboard,
-            color_config: ColorConfig::default(),
-        }
-    }
-
-    // TO REMOVE
-    pub fn load_books(&mut self, _cx: &mut Context<Self>) -> impl IntoElement {
-        if self.loading {
-            return div().child("Cargando libros...");
-        }
-        div().child("Todos los libros")
-    }
-
-    // TO REMOVE
-    pub fn load_authors(&mut self, _cx: &mut Context<Self>) -> impl IntoElement {
-        div().child("Autores")
-    }
-
-    // TO REMOVE
-    pub fn load_notes(&mut self, _cx: &mut Context<Self>) -> impl IntoElement {
-        div().child("Anotaciones")
-    }
-
-    // TO REMOVE
-    pub fn load_active_module(&mut self, cx: &mut Context<Self>) -> impl IntoElement {
-        //println!("load_active_panel fn: {:?}", self.active_module);
-
-        match self.active_module {
-            ActiveModule::Dashboard => self.dashboard.clone().into_any_element(),
-            ActiveModule::Books => self.load_books(cx).into_any_element(),
-            ActiveModule::Authors => self.load_authors(cx).into_any_element(),
-            ActiveModule::Notes => self.load_notes(cx).into_any_element(),
-            _ => div().child("nada aun").into_any_element(),
-        }
-    } //load_active_panel
 }
 
 impl Render for MainWindow {
@@ -204,4 +153,50 @@ impl Render for MainWindow {
                     ),
             )
     }
+}
+
+// métodos
+impl MainWindow {
+    pub fn new(_window: &mut Window, cx: &mut Context<Self>) -> Self {
+        let sidebar = cx.new(|_| AppSidebar::new());
+        let dashboard = cx.new(|_| Dashboard::new());
+        let books = cx.new(|_| Books::new());
+        let authors = cx.new(|_| Authors::new());
+
+        let subscription = cx.subscribe(&sidebar, |this, _sidebar, event: &NavigateTo, cx| {
+            println!("llegó desde NavigateTo: {:?}", event.module);
+            this.active_module = event.module;
+            cx.notify();
+        });
+
+        Self {
+            loading: true,
+            toggle_theme: true,
+            sidebar,
+            dashboard,
+            books,
+            authors,
+            _sidebar_subscription: subscription,
+            active_module: ActiveModule::Dashboard,
+            color_config: ColorConfig::default(),
+        }
+    }
+
+    // TO REMOVE
+    pub fn load_notes(&mut self, _cx: &mut Context<Self>) -> impl IntoElement {
+        div().child("Anotaciones")
+    }
+
+    // TO CHECK
+    pub fn load_active_module(&mut self, cx: &mut Context<Self>) -> impl IntoElement {
+        //println!("load_active_module fn: {:?}", self.active_module);
+
+        match self.active_module {
+            ActiveModule::Dashboard => self.dashboard.clone().into_any_element(),
+            ActiveModule::Books => self.books.clone().into_any_element(),
+            ActiveModule::Authors => self.authors.clone().into_any_element(),
+            ActiveModule::Notes => self.load_notes(cx).into_any_element(),
+            _ => div().child("nada aun").into_any_element(),
+        }
+    } //load_active_module
 }
