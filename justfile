@@ -32,17 +32,14 @@ fix: check
 fix-all: fmt
 	cargo fix --allow-dirty --allow-no-vcs
 
+[group("Dev")]
+[unix]
 run: fmt
 	RUST_BACKTRACE=full cargo run
 
 [group("Dev")]
-[unix]
-run-u: fmt
-	RUST_BACKTRACE=full cargo run
-
-[group("Dev")]
 [windows]
-run-w: fmt
+run:
 	$env:RUST_BACKTRACE = "full"; cargo run
 
 [group("Build")]
@@ -54,13 +51,16 @@ release: fmt
 	cargo build --release
 
 [group("Watch")]
-watch: fmt
-	# watchexec -c -w assets -w src -r cargo run
-	watchexec -c -w src -r cargo run
+watch:
+	#watchexec -c -w assets -w src -r cargo run
+	#watchexec -c -w src -e rs -r -- "./rust-reload.ps1"
+	watchexec -c -w src -e rs -r -- "cargo fmt ; cargo run"
+	# watchexec -c -w src -e rs -r -- "pwsh -NoProfile -ExecutionPolicy Bypass -File .\rust-reload.ps1"
 
 [group("Watch")]
 c: fmt
 	watchexec -c -w src -r cargo check
+
 
 [group("Maintenance")]
 clean:
