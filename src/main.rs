@@ -77,6 +77,6 @@ fn main() {
 
             cx.new(|cx| MainWindow::new(window, cx))
         })
-            .expect("Failed to open main window");
+        .expect("Failed to open main window");
     });
 }
