@@ -9,6 +9,7 @@ A very simple, native desktop application, written in [Rust](https://www.rust-la
 
 **Thekes** comes from [θήκη](https://en.wikipedia.org/wiki/Library#Etymology) ('théke', 'cupboard, box'),'the place where books are kept'.
 
+
 ## Installation
 
 Download the latest Windows, or Gnu/Linux build from [Releases](https://github.com/HomeInside/thekes/releases). Checksums are included.
@@ -64,5 +65,5 @@ Pre-built binaries for Gnu/Linux, and Windows can be found on the [releases page
 
 **thekes** is licensed under either of the following licenses, at your option:
 
-- Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or [http://www.apache.org/licenses/LICENSE-2.0])
-- MIT license ([LICENSE-MIT](LICENSE-MIT) or [http://opensource.org/licenses/MIT])
+- Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0))
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or [http://opensource.org/licenses/MIT](http://opensource.org/licenses/MIT))
