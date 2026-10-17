@@ -20,10 +20,9 @@ pub struct AppSidebar {
     pub(crate) active_item: ActiveModule,
 }
 
-// eventos para notificar el cambio de modulo/panel
+// eventos para notificar el cambio de módulo/panel
 impl EventEmitter<NavigateTo> for AppSidebar {}
 
-// render
 impl Render for AppSidebar {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         Sidebar::new("MySidebar")
@@ -70,12 +69,7 @@ impl Render for AppSidebar {
                                 .icon(IconName::LayoutDashboard)
                                 .active(self.active_item == ActiveModule::Dashboard)
                                 .on_click(cx.listener(|this, _, _, cx| {
-                                    //TODO
-                                    this.active_item = ActiveModule::Dashboard;
-                                    println!("enviando event NavigateTo::Dashboard");
-                                    cx.emit(NavigateTo {
-                                        module: ActiveModule::Dashboard,
-                                    });
+                                    this.click_module_change(ActiveModule::Dashboard, cx);
                                     cx.notify();
                                 })),
                         )
@@ -84,12 +78,7 @@ impl Render for AppSidebar {
                                 .icon(AssetIconName::LibraryBig)
                                 .active(self.active_item == ActiveModule::Books)
                                 .on_click(cx.listener(|this, _, _, cx| {
-                                    //TODO
-                                    this.active_item = ActiveModule::Books;
-                                    println!("enviando event NavigateTo::Books");
-                                    cx.emit(NavigateTo {
-                                        module: ActiveModule::Books,
-                                    });
+                                    this.click_module_change(ActiveModule::Books, cx);
                                     cx.notify();
                                 })),
                         )
@@ -97,9 +86,8 @@ impl Render for AppSidebar {
                             SidebarMenuItem::new("Autores")
                                 .icon(AssetIconName::Users)
                                 .active(self.active_item == ActiveModule::Authors)
-                                .on_click(cx.listener(|_this, _, _, cx| {
-                                    //TODO
-                                    //this.active_item = SidebarItem::Authors;
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    this.click_module_change(ActiveModule::Authors, cx);
                                     cx.notify();
                                 })),
                         )
@@ -107,9 +95,8 @@ impl Render for AppSidebar {
                             SidebarMenuItem::new("Anotaciones")
                                 .icon(AssetIconName::NotebookPen)
                                 .active(self.active_item == ActiveModule::Notes)
-                                .on_click(cx.listener(|_this, _, _, cx| {
-                                    //TODO
-                                    //this.active_item = SidebarItem::Notes;
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    this.click_module_change(ActiveModule::Notes, cx);
                                     cx.notify();
                                 })),
                         ),
@@ -124,9 +111,8 @@ impl Render for AppSidebar {
                             SidebarMenuItem::new("Sin clasificar")
                                 .icon(IconName::FolderClosed)
                                 .active(self.active_item == ActiveModule::Unclassified)
-                                .on_click(cx.listener(|_this, _, _, cx| {
-                                    //TODO
-                                    // this.active_item = SidebarItem::Unclassified;
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    this.click_module_change(ActiveModule::Unclassified, cx);
                                     cx.notify();
                                 })),
                         )
@@ -134,9 +120,8 @@ impl Render for AppSidebar {
                             SidebarMenuItem::new("Favoritos")
                                 .icon(IconName::Heart)
                                 .active(self.active_item == ActiveModule::Favorites)
-                                .on_click(cx.listener(|_this, _, _, cx| {
-                                    //TODO
-                                    // this.active_item = SidebarItem::Favorites;
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    this.click_module_change(ActiveModule::Favorites, cx);
                                     cx.notify();
                                 })),
                         )
@@ -145,9 +130,8 @@ impl Render for AppSidebar {
                             SidebarMenuItem::new("Estoy leyendo")
                                 .icon(AssetIconName::BookOpenCheck)
                                 .active(self.active_item == ActiveModule::CurrentlyReading)
-                                .on_click(cx.listener(|_this, _, _, cx| {
-                                    //TODO
-                                    // this.active_item = SidebarItem::CurrentlyReading;
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    this.click_module_change(ActiveModule::CurrentlyReading, cx);
                                     cx.notify();
                                 })),
                         )
@@ -155,9 +139,8 @@ impl Render for AppSidebar {
                             SidebarMenuItem::new("Lo que quiero leer")
                                 .icon(AssetIconName::ListTodo)
                                 .active(self.active_item == ActiveModule::WantToRead)
-                                .on_click(cx.listener(|_this, _, _, cx| {
-                                    //TODO
-                                    // this.active_item = SidebarItem::WantToRead;
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    this.click_module_change(ActiveModule::WantToRead, cx);
                                     cx.notify();
                                 })),
                         )
@@ -165,9 +148,8 @@ impl Render for AppSidebar {
                             SidebarMenuItem::new("Finalizado")
                                 .icon(AssetIconName::CircleCheckBig)
                                 .active(self.active_item == ActiveModule::Finished)
-                                .on_click(cx.listener(|_this, _, _, cx| {
-                                    //TODO
-                                    // this.active_item = SidebarItem::Finished;
+                                .on_click(cx.listener(|this, _, _, cx| {
+                                    this.click_module_change(ActiveModule::Finished, cx);
                                     cx.notify();
                                 })),
                         ),
@@ -251,7 +233,7 @@ impl Render for AppSidebar {
     }
 }
 
-// metodos/events
+// métodos/acciones/eventos
 impl AppSidebar {
     pub fn new() -> Self {
         Self {
@@ -260,10 +242,16 @@ impl AppSidebar {
             active_item: ActiveModule::Dashboard,
         }
     }
-
     pub fn click_toggle_sidebar(&mut self, cx: &mut Context<Self>) {
         println!("toggle_sidebar fn");
         self.collapsed = !self.collapsed;
         cx.notify();
+    }
+
+    pub fn click_module_change(&mut self, toogle_module: ActiveModule, cx: &mut Context<Self>) {
+        self.active_item = toogle_module;
+
+        println!("enviando event NavigateTo: {:?}", self.active_item);
+        cx.emit(NavigateTo { module: toogle_module });
     }
 }
