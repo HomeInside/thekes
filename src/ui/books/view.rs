@@ -10,6 +10,7 @@ use gpui_kit::component::h_flex;
 use gpui_kit::component::input::{Input, InputState};
 use gpui_kit::component::menu::DropdownMenu;
 use gpui_kit::component::scroll::ScrollableElement;
+use gpui_kit::component::tooltip::Tooltip;
 use gpui_kit::component::{Icon, IconName};
 use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::*;
@@ -192,6 +193,8 @@ impl Books {
                             .w_full()
                             .text_size(px(18.))
                             .font_weight(FontWeight::BOLD)
+                            .line_clamp(3)
+                            .text_ellipsis()
                             .child(book.title),
                     ),
             )
@@ -205,6 +208,7 @@ impl Books {
                             div()
                                 .text_xs()
                                 .text_color(rgb(0x777777))
+                                .line_clamp(2)
                                 .text_ellipsis()
                                 .child(book.author)
                                 .child(div().text_xs().text_color(rgb(0x777777)).child("1900")),
