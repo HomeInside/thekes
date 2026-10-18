@@ -1,2 +1,3 @@
+pub mod actions;
 mod view;
-pub use view::Books;
+pub use view::{BookAction, BookOperation, Books};
