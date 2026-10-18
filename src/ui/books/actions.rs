@@ -17,15 +17,21 @@ pub struct BookAction {
     pub book_id: u64,
     pub book_op: BookOperation,
 }
-
 //acciones/eventos
 impl Books {
-    pub fn click_search_filters(&mut self, cx: &mut Context<Self>) {
-        println!("click_search_filters fn");
-        let text = self.input_search.read(cx).value().to_string();
-        println!("input_search: {}", text);
+    pub fn click_btn_new_book(&mut self, _cx: &mut Context<Self>) {
+        println!("click_btn_new_book fn");
+    } //click_btn_new_book
+    pub fn click_btn_search(&mut self, cx: &mut Context<Self>) {
+        println!("click_btn_search fn");
+        let text_search = self.input_search.read(cx).value().to_string();
+        println!("input_search: {}", text_search);
+
+        self.all_books = Self::find_books(&text_search);
+        self.result_count = self.all_books.len();
         cx.notify();
-    }
+    } //click_btn_search
+
     pub fn toggle_favorite(&mut self, book_id: u64, _cx: &mut Context<Self>) {
         println!("toggle_favorite fn");
         println!("toggle_favorite book_id: {}", book_id);
