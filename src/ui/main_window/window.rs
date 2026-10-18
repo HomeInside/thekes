@@ -157,10 +157,10 @@ impl Render for MainWindow {
 
 // métodos
 impl MainWindow {
-    pub fn new(_window: &mut Window, cx: &mut Context<Self>) -> Self {
+    pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
         let sidebar = cx.new(|_| AppSidebar::new());
         let dashboard = cx.new(|_| Dashboard::new());
-        let books = cx.new(|_| Books::new());
+        let books = cx.new(|cx| Books::new(window, cx));
         let authors = cx.new(|_| Authors::new());
 
         let subscription = cx.subscribe(&sidebar, |this, _sidebar, event: &NavigateTo, cx| {
@@ -177,7 +177,7 @@ impl MainWindow {
             books,
             authors,
             _sidebar_subscription: subscription,
-            active_module: ActiveModule::Dashboard,
+            active_module: ActiveModule::Books, //Dashboard
             color_config: ColorConfig::default(),
         }
     }
