@@ -1,5 +1,22 @@
-use super::{BookAction, BookOperation, Books};
+use super::Books;
+use gpui_kit::Action;
 use gpui_kit::{Context, Window};
+
+#[derive(Clone, PartialEq)]
+pub enum BookOperation {
+    Favorite,
+    Reading,
+    WantToRead,
+    Finished,
+    Details,
+}
+
+#[derive(Action, Clone, PartialEq)]
+#[action(namespace = view_book, no_json)]
+pub struct BookAction {
+    pub book_id: u64,
+    pub book_op: BookOperation,
+}
 
 //acciones/eventos
 impl Books {

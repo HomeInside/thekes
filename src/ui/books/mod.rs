@@ -1,3 +1,6 @@
-pub mod actions;
+mod actions;
+mod items;
 mod view;
-pub use view::{BookAction, BookOperation, Books};
+pub use actions::{BookAction, BookOperation};
+pub use items::{BOOKS_LIST, BookItem};
+pub use view::Books;
