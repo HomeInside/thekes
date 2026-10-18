@@ -17,22 +17,15 @@ use gpui_kit::{Context, Entity, Render, Styled, Window};
 
 pub struct Books {
     color_config: ColorConfig,
-    search: String,
     pub input_search: Entity<InputState>,
     //pub hovered_book: Option<&'static str>,
     //focus_handle: FocusHandle,
+    pub(crate) all_books: Vec<BookItem>,
+    pub(crate) result_count: usize,
 }
 
 impl Render for Books {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let search = self.search.to_lowercase();
-
-        let filtered_books: Vec<&BookItem> = BOOKS_LIST
-            .iter()
-            .filter(|book| book.title.to_lowercase().contains(&search) || book.author.to_lowercase().contains(&search))
-            .collect();
-
-        let results_count = filtered_books.len();
         let compact = window.viewport_size().width < px(700.);
 
         div()
@@ -71,15 +64,16 @@ impl Render for Books {
                             )
                             .child(div().text_sm().text_color(self.color_config.muted).child(format!(
                                 "{} {}",
-                                results_count,
-                                if results_count == 1 { "libro" } else { "libros" }
+                                self.result_count,
+                                if self.result_count == 1 { "libro" } else { "libros" }
                             ))),
                     )
                     .child(
-                        Button::new("add-book")
+                        Button::new("btn-add-book")
                             .primary()
                             .icon(AssetIconName::Plus)
-                            .label("Añadir libro"),
+                            .label("Nuevo libro")
+                            .on_click(cx.listener(|this, _, _, cx| this.click_btn_new_book(cx))),
                     ),
             )
             // Barra de herramientas
@@ -105,17 +99,15 @@ impl Render for Books {
                             .border_color(cx.theme().border)
                             .bg(cx.theme().background)
                             .child(Icon::new(AssetIconName::Search).text_color(self.color_config.muted))
-                            .child(div().flex_1().min_w_0().child(Input::new(&self.input_search))),
-                    )
-                    // Filtros
-                    .child(
-                        h_flex().items_center().gap_2().child(
-                            Button::new("book-filters")
-                                .outline()
-                                .icon(AssetIconName::SlidersHorizontal)
-                                .label("Filtros")
-                                .on_click(cx.listener(|this, _, _, cx| this.click_search_filters(cx))),
-                        ),
+                            .child(div().flex_1().min_w_0().child(Input::new(&self.input_search)))
+                            .child(
+                                h_flex().items_center().gap_2().child(
+                                    Button::new("btn-search-book")
+                                        .icon(AssetIconName::Search)
+                                        .label("Buscar")
+                                        .on_click(cx.listener(|this, _, _, cx| this.click_btn_search(cx))),
+                                ),
+                            ),
                     ),
             )
             // Catálogo
@@ -126,15 +118,7 @@ impl Render for Books {
                     .min_w_0()
                     .min_h_0()
                     .overflow_y_scrollbar()
-                    .child(
-                        div()
-                            .w_full()
-                            .flex()
-                            .flex_wrap()
-                            .items_start()
-                            .gap_4()
-                            .children(filtered_books.into_iter().map(|book| Self::book_card(book))),
-                    ),
+                    .child(self.draw_books()),
             )
     }
 } //impl Render for Books
@@ -144,14 +128,35 @@ impl Books {
     pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
         Self {
             color_config: ColorConfig::default(),
-            search: String::new(),
             input_search: cx.new(|cx| InputState::new(window, cx).placeholder("Buscar por título o autor...")),
             //hovered_book: None,
             //focus_handle: cx.focus_handle(),
+            all_books: Self::find_books(""),
+            result_count: BOOKS_LIST.len(),
         }
     }
 
-    fn book_card(book: &BookItem) -> impl IntoElement {
+    pub fn find_books(query: &str) -> Vec<BookItem> {
+        let query = query.trim().to_lowercase();
+
+        BOOKS_LIST
+            .iter()
+            .filter(|book| query.is_empty() || book.title.to_lowercase().contains(&query))
+            .cloned()
+            .collect()
+    }
+
+    fn draw_books(&self) -> impl IntoElement {
+        div()
+            .w_full()
+            .flex()
+            .flex_wrap()
+            .items_start()
+            .gap_4()
+            .children(self.all_books.iter().map(|book| self.book_card(book)))
+    }
+
+    fn book_card(&self, book: &BookItem) -> impl IntoElement {
         let book_id = book.id;
         let _book_title = book.title;
         let button_id = format!("book-menu-{}", book.id);
