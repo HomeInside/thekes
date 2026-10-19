@@ -29,6 +29,7 @@ icon_assets!(
         TimerReset,
         Palette,
         MoonStar,
+        BookText,
         //
         //BookBookmark, // no existe aun
         Accessibility,
@@ -63,7 +64,7 @@ fn main() {
 
         // ventana principal
         let window_options = WindowOptions {
-            window_bounds: Some(WindowBounds::centered(size(px(1280.), px(720.)), cx)),
+            window_bounds: Some(WindowBounds::centered(size(px(1320.), px(800.)), cx)),
             ..TitleBar::window_options()
         };
 
