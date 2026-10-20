@@ -271,10 +271,16 @@ impl Authors {
     }
 
     // TODO
-    // acciones cuando ocurra el evento de favoritos/detalles
-    pub fn show_details(&mut self, author_id: u64, _cx: &mut Context<Self>) {
+    pub fn add_fav(&mut self, author_id: u64, cx: &mut Context<Self>) {
+        println!("add_fav fn");
+        println!("add_fav author_id: {}", author_id);
+    }
+
+    pub fn show_details(&mut self, author_id: u64, cx: &mut Context<Self>) {
         println!("show_details fn");
         println!("show_details author_id: {}", author_id);
+        println!("enviando evento ShowDetails");
+        cx.emit(AuthorViewEvent::ShowDetails);
     }
 
     pub fn click_author_action(&mut self, action: &AuthorAction, _window: &mut Window, cx: &mut Context<Self>) {
@@ -283,7 +289,7 @@ impl Authors {
 
         match &action.author_op {
             AuthorOperation::Favorite => {
-                self.show_details(action.author_id, cx);
+                self.add_fav(action.author_id, cx);
             }
             AuthorOperation::Details => {
                 self.show_details(action.author_id, cx);
