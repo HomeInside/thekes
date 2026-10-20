@@ -1,6 +1,6 @@
 use super::ColorConfig;
 use super::subcriptions::{ActiveModule, NavigateTo};
-use crate::ui::authors::Authors;
+use crate::ui::authors::{AuthorFormView, AuthorViewEvent, Authors};
 use crate::ui::books::Books;
 use crate::ui::dashboard::Dashboard;
 use crate::ui::sidebar::AppSidebar;
@@ -25,6 +25,11 @@ pub struct MainWindow {
     _sidebar_subscription: Subscription,
     pub(crate) active_module: ActiveModule,
     pub(crate) color_config: ColorConfig,
+    // para autores
+    pub(crate) author_form: Entity<AuthorFormView>,
+    pub(crate) show_author_form: bool,
+    _author_view_subscription: Subscription,
+    _author_form_subscription: Subscription,
 }
 
 impl Render for MainWindow {
@@ -161,7 +166,28 @@ impl MainWindow {
         let sidebar = cx.new(|_| AppSidebar::new());
         let dashboard = cx.new(|_| Dashboard::new());
         let books = cx.new(|cx| Books::new(window, cx));
-        let authors = cx.new(|_| Authors::new());
+        //let authors = cx.new(|_| Authors::new());
+        let authors = cx.new(|cx| Authors::new(window, cx));
+        // ==============
+        // TODO para autores
+        let author_form = cx.new(|cx| AuthorFormView::new(window, cx));
+        //
+        let author_view_subscription = cx.subscribe(&authors, |this, _authors, event: &AuthorViewEvent, cx| {
+            match event {
+                AuthorViewEvent::ShowForm => this.show_author_form = true,
+                AuthorViewEvent::ShowList => this.show_author_form = false,
+            }
+            cx.notify();
+        });
+
+        let author_form_subscription = cx.subscribe(&author_form, |this, _form, event: &AuthorViewEvent, cx| {
+            match event {
+                AuthorViewEvent::ShowForm => this.show_author_form = true,
+                AuthorViewEvent::ShowList => this.show_author_form = false,
+            }
+            cx.notify();
+        });
+        // ==============
 
         let subscription = cx.subscribe(&sidebar, |this, _sidebar, event: &NavigateTo, cx| {
             println!("llegó desde NavigateTo: {:?}", event.module);
@@ -177,8 +203,13 @@ impl MainWindow {
             books,
             authors,
             _sidebar_subscription: subscription,
-            active_module: ActiveModule::Books, //Dashboard
+            active_module: ActiveModule::Dashboard,
             color_config: ColorConfig::default(),
+            // TODO para autores
+            author_form,
+            show_author_form: false,
+            _author_view_subscription: author_view_subscription,
+            _author_form_subscription: author_form_subscription,
         }
     }
 
@@ -193,7 +224,16 @@ impl MainWindow {
         match self.active_module {
             ActiveModule::Dashboard => self.dashboard.clone().into_any_element(),
             ActiveModule::Books => self.books.clone().into_any_element(),
-            ActiveModule::Authors => self.authors.clone().into_any_element(),
+            //ActiveModule::Authors => self.authors.clone().into_any_element(),
+            // TODO para autores
+            ActiveModule::Authors => {
+                if self.show_author_form {
+                    self.author_form.clone().into_any_element()
+                } else {
+                    self.authors.clone().into_any_element()
+                }
+            }
+            //
             ActiveModule::Notes => self.load_notes(cx).into_any_element(),
             _ => div().child("nada aun").into_any_element(),
         }
