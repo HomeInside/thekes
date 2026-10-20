@@ -1,5 +1,6 @@
 pub mod actions;
 mod colors;
+pub mod events;
 pub mod subcriptions;
 mod window;
 
