@@ -1,5 +1,5 @@
-use super::{BOOKS_LIST, BookItem};
 use super::{BookAction, BookOperation};
+use crate::database::books::{BOOKS_LIST, BookItem};
 use crate::ui::main_window::ColorConfig;
 use gpui_kit::IntoElement;
 use gpui_kit::assets::IconName as AssetIconName;
@@ -10,7 +10,6 @@ use gpui_kit::component::h_flex;
 use gpui_kit::component::input::{Input, InputState};
 use gpui_kit::component::menu::DropdownMenu;
 use gpui_kit::component::scroll::ScrollableElement;
-use gpui_kit::component::tooltip::Tooltip;
 use gpui_kit::component::{Icon, IconName};
 use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::*;
@@ -104,7 +103,7 @@ impl Render for Books {
                             .child(
                                 h_flex().items_center().gap_2().child(
                                     Button::new("btn-search-book")
-                                        .icon(AssetIconName::Search)
+                                        .primary()
                                         .label("Buscar")
                                         .on_click(cx.listener(|this, _, _, cx| this.click_btn_search(cx))),
                                 ),

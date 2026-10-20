@@ -17,6 +17,7 @@ pub struct BookAction {
     pub book_id: u64,
     pub book_op: BookOperation,
 }
+
 //acciones/eventos
 impl Books {
     pub fn click_btn_new_book(&mut self, _cx: &mut Context<Self>) {

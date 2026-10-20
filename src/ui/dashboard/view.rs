@@ -87,7 +87,7 @@ impl Render for Dashboard {
                         div()
                             .text_sm()
                             //.text_color(self.sidebar_config.muted)
-                            .child("Organiza tus proyectos y encuentra rápidamente lo que necesitas."),
+                            .child("Organiza tu biblioteca y encuentra rápidamente lo que necesitas."),
                     ),
             )
             // ACCESO RÁPIDO
