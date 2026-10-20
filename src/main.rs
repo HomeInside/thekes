@@ -6,6 +6,7 @@ use gpui_kit::component::TitleBar;
 use gpui_kit::*;
 use std::borrow::Cow;
 
+mod database;
 mod ui;
 mod utils;
 use crate::ui::main_window::MainWindow;
