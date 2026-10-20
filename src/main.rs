@@ -31,6 +31,7 @@ icon_assets!(
         Palette,
         MoonStar,
         BookText,
+        Feather,
         //
         //BookBookmark, // no existe aun
         Accessibility,
