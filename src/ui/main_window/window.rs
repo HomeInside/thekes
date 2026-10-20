@@ -1,6 +1,6 @@
 use super::ColorConfig;
 use super::subcriptions::{ActiveModule, NavigateTo};
-use crate::ui::authors::{AuthorFormView, AuthorViewEvent, Authors};
+use crate::ui::authors::{AuthorDetailsView, AuthorFormView, AuthorViewEvent, Authors};
 use crate::ui::books::Books;
 use crate::ui::dashboard::Dashboard;
 use crate::ui::sidebar::AppSidebar;
@@ -19,17 +19,21 @@ pub struct MainWindow {
     pub(crate) loading: bool,
     pub(crate) toggle_theme: bool,
     sidebar: Entity<AppSidebar>,
-    pub(crate) dashboard: Entity<Dashboard>,
-    pub(crate) books: Entity<Books>,
-    pub(crate) authors: Entity<Authors>,
-    _sidebar_subscription: Subscription,
     pub(crate) active_module: ActiveModule,
     pub(crate) color_config: ColorConfig,
-    // para autores
+    //
+    pub(crate) dashboard: Entity<Dashboard>,
+    pub(crate) books: Entity<Books>,
+    // autores crear/editar
+    pub(crate) authors: Entity<Authors>,
     pub(crate) author_form: Entity<AuthorFormView>,
     pub(crate) show_author_form: bool,
-    _author_view_subscription: Subscription,
-    _author_form_subscription: Subscription,
+    // autores detalles
+    pub(crate) author_details: Entity<AuthorDetailsView>,
+    pub(crate) show_author_details: bool,
+    //
+    //_sidebar_subscription: Subscription,
+    pub(super) _subscriptions: Vec<Subscription>,
 }
 
 impl Render for MainWindow {
@@ -166,30 +170,19 @@ impl MainWindow {
         let sidebar = cx.new(|_| AppSidebar::new());
         let dashboard = cx.new(|_| Dashboard::new());
         let books = cx.new(|cx| Books::new(window, cx));
-        //let authors = cx.new(|_| Authors::new());
+
+        // manejar instancia del módulo de autores
         let authors = cx.new(|cx| Authors::new(window, cx));
-        // ==============
-        // TODO para autores
         let author_form = cx.new(|cx| AuthorFormView::new(window, cx));
-        //
-        let author_view_subscription = cx.subscribe(&authors, |this, _authors, event: &AuthorViewEvent, cx| {
-            match event {
-                AuthorViewEvent::ShowForm => this.show_author_form = true,
-                AuthorViewEvent::ShowList => this.show_author_form = false,
-            }
-            cx.notify();
-        });
+        let author_details = cx.new(|cx| AuthorDetailsView::new(window, cx));
 
-        let author_form_subscription = cx.subscribe(&author_form, |this, _form, event: &AuthorViewEvent, cx| {
-            match event {
-                AuthorViewEvent::ShowForm => this.show_author_form = true,
-                AuthorViewEvent::ShowList => this.show_author_form = false,
-            }
-            cx.notify();
-        });
-        // ==============
+        // manejar eventos de módulo autores
+        let subs_author_view = Self::subscribe_author_events(&authors, window, cx, "authors_list");
+        let subs_author_form = Self::subscribe_author_events(&author_form, window, cx, "authors_form");
+        let subs_author_details = Self::subscribe_author_events(&author_details, window, cx, "authors_details");
 
-        let subscription = cx.subscribe(&sidebar, |this, _sidebar, event: &NavigateTo, cx| {
+        // manejar eventos de la sidebar
+        let subs_sidebar = cx.subscribe(&sidebar, |this, _sidebar, event: &NavigateTo, cx| {
             println!("llegó desde NavigateTo: {:?}", event.module);
             this.active_module = event.module;
             cx.notify();
@@ -199,17 +192,19 @@ impl MainWindow {
             loading: true,
             toggle_theme: true,
             sidebar,
+            active_module: ActiveModule::Dashboard,
+            color_config: ColorConfig::default(),
+            //
             dashboard,
             books,
             authors,
-            _sidebar_subscription: subscription,
-            active_module: ActiveModule::Dashboard,
-            color_config: ColorConfig::default(),
-            // TODO para autores
+            // autores crear/editar
             author_form,
             show_author_form: false,
-            _author_view_subscription: author_view_subscription,
-            _author_form_subscription: author_form_subscription,
+            // autores detalles
+            author_details,
+            show_author_details: false,
+            _subscriptions: vec![subs_sidebar, subs_author_view, subs_author_form, subs_author_details],
         }
     }
 
@@ -224,11 +219,11 @@ impl MainWindow {
         match self.active_module {
             ActiveModule::Dashboard => self.dashboard.clone().into_any_element(),
             ActiveModule::Books => self.books.clone().into_any_element(),
-            //ActiveModule::Authors => self.authors.clone().into_any_element(),
-            // TODO para autores
             ActiveModule::Authors => {
                 if self.show_author_form {
                     self.author_form.clone().into_any_element()
+                } else if self.show_author_details {
+                    self.author_details.clone().into_any_element()
                 } else {
                     self.authors.clone().into_any_element()
                 }
