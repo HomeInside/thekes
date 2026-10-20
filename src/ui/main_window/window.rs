@@ -207,30 +207,4 @@ impl MainWindow {
             _subscriptions: vec![subs_sidebar, subs_author_view, subs_author_form, subs_author_details],
         }
     }
-
-    // TO REMOVE
-    pub fn load_notes(&mut self, _cx: &mut Context<Self>) -> impl IntoElement {
-        div().child("Anotaciones")
-    }
-
-    // TO CHECK
-    pub fn load_active_module(&mut self, cx: &mut Context<Self>) -> impl IntoElement {
-        //println!("load_active_module fn: {:?}", self.active_module);
-        match self.active_module {
-            ActiveModule::Dashboard => self.dashboard.clone().into_any_element(),
-            ActiveModule::Books => self.books.clone().into_any_element(),
-            ActiveModule::Authors => {
-                if self.show_author_form {
-                    self.author_form.clone().into_any_element()
-                } else if self.show_author_details {
-                    self.author_details.clone().into_any_element()
-                } else {
-                    self.authors.clone().into_any_element()
-                }
-            }
-            //
-            ActiveModule::Notes => self.load_notes(cx).into_any_element(),
-            _ => div().child("nada aun").into_any_element(),
-        }
-    } //load_active_module
 }
