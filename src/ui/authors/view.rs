@@ -15,9 +15,11 @@ use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::*;
 use gpui_kit::{Context, Entity, Render, Styled, Window};
 
+#[derive(Debug, Copy, Clone)]
 pub enum AuthorViewEvent {
     ShowForm,
     ShowList,
+    ShowDetails,
 }
 
 pub struct Authors {
