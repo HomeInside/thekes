@@ -1,16 +1,12 @@
 use super::AuthorViewEvent;
 use crate::ui::main_window::ColorConfig;
 use gpui_kit::IntoElement;
-use gpui_kit::assets::IconName as AssetIconName;
-use gpui_kit::component::Sizable;
 use gpui_kit::component::button::{Button, ButtonVariants};
-use gpui_kit::component::input::{Input, InputState, Textarea, TextareaState};
 use gpui_kit::component::scroll::ScrollableElement;
 use gpui_kit::component::{Icon, IconName};
 use gpui_kit::component::{h_flex, v_flex};
-use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::*;
-use gpui_kit::{Context, Entity, Render, Styled, Window};
+use gpui_kit::{Context, Render, Styled, Window};
 
 #[allow(dead_code)]
 pub struct AuthorDetailsView {
