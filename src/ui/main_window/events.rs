@@ -1,9 +1,7 @@
 use super::MainWindow;
-use crate::ui::authors::{AuthorDetailsView, AuthorFormView, AuthorViewEvent, Authors};
-use gpui_kit::component::ActiveTheme;
-use gpui_kit::component::WindowExt;
+use crate::ui::authors::AuthorViewEvent;
 use gpui_kit::*;
-use gpui_kit::{Context, Render, Styled, Window};
+use gpui_kit::{Context, Window};
 
 impl MainWindow {
     /// Registra una suscripción a los eventos de navegación de las
@@ -17,7 +15,7 @@ impl MainWindow {
     ///
     pub fn subscribe_author_events<T>(
         entity: &Entity<T>,
-        window: &mut Window,
+        _window: &mut Window,
         cx: &mut Context<Self>,
         source: &'static str,
     ) -> Subscription

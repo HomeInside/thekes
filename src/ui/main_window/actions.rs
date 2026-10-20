@@ -1,9 +1,9 @@
 use super::MainWindow;
-use super::subcriptions::{ActiveModule, NavigateTo};
+use super::subcriptions::ActiveModule;
+use gpui_kit::Context;
 use gpui_kit::IntoElement;
 use gpui_kit::component::{Theme, ThemeMode};
 use gpui_kit::*;
-use gpui_kit::{Context, Render, Styled, Window};
 
 // acciones/eventos
 impl MainWindow {

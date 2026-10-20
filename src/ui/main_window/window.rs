@@ -1,6 +1,6 @@
 use super::ColorConfig;
 use super::subcriptions::{ActiveModule, NavigateTo};
-use crate::ui::authors::{AuthorDetailsView, AuthorFormView, AuthorViewEvent, Authors};
+use crate::ui::authors::{AuthorDetailsView, AuthorFormView, Authors};
 use crate::ui::books::Books;
 use crate::ui::dashboard::Dashboard;
 use crate::ui::sidebar::AppSidebar;

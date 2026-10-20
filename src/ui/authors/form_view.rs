@@ -1,12 +1,9 @@
 use super::AuthorViewEvent;
 use crate::ui::main_window::ColorConfig;
 use gpui_kit::IntoElement;
-use gpui_kit::assets::IconName as AssetIconName;
-use gpui_kit::component::ActiveTheme;
 use gpui_kit::component::Sizable;
 use gpui_kit::component::button::{Button, ButtonVariants};
 use gpui_kit::component::input::{Input, InputState, Textarea, TextareaState};
-use gpui_kit::component::menu::DropdownMenu;
 use gpui_kit::component::scroll::ScrollableElement;
 use gpui_kit::component::{Icon, IconName, h_flex, v_flex};
 use gpui_kit::prelude::FluentBuilder;

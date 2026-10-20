@@ -1,19 +1,17 @@
 use super::AuthorViewEvent;
 use crate::ui::main_window::ColorConfig;
 use gpui_kit::IntoElement;
-use gpui_kit::assets::IconName as AssetIconName;
-use gpui_kit::component::ActiveTheme;
-use gpui_kit::component::Sizable;
 use gpui_kit::component::button::{Button, ButtonVariants};
 use gpui_kit::*;
-use gpui_kit::{Context, Entity, Render, Styled, Window};
+use gpui_kit::{Context, Render, Styled, Window};
 
+#[allow(dead_code)]
 pub struct AuthorDetailsView {
     pub(crate) color_config: ColorConfig,
 }
 
 impl AuthorDetailsView {
-    pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+    pub fn new(_window: &mut Window, _cx: &mut Context<Self>) -> Self {
         Self {
             color_config: ColorConfig::default(),
         }
@@ -23,7 +21,7 @@ impl AuthorDetailsView {
 impl EventEmitter<AuthorViewEvent> for AuthorDetailsView {}
 
 impl Render for AuthorDetailsView {
-    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         div()
             // deben ir en la raiz para que puedan propagarse
             // los eventos en cualquier parte de la app

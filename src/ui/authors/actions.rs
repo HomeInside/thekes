@@ -6,18 +6,16 @@ use gpui_kit::AppContext;
 use gpui_kit::IntoElement;
 use gpui_kit::Rgba;
 use gpui_kit::assets::IconName as AssetIconName;
-use gpui_kit::component::ActiveTheme;
+use gpui_kit::component::IconName;
 use gpui_kit::component::Sizable;
 use gpui_kit::component::button::{Button, ButtonVariants};
-use gpui_kit::component::input::{Input, InputState};
+use gpui_kit::component::h_flex;
+use gpui_kit::component::input::InputState;
 use gpui_kit::component::menu::DropdownMenu;
-use gpui_kit::component::scroll::ScrollableElement;
-use gpui_kit::component::{Icon, IconName};
-use gpui_kit::component::{h_flex, v_flex};
-use gpui_kit::prelude::FluentBuilder;
+//use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::rgb;
 use gpui_kit::*;
-use gpui_kit::{Context, Entity, Render, Styled, Window};
+use gpui_kit::{Context, Styled, Window};
 
 #[derive(Clone, PartialEq)]
 pub enum AuthorOperation {
@@ -271,7 +269,7 @@ impl Authors {
     }
 
     // TODO
-    pub fn add_fav(&mut self, author_id: u64, cx: &mut Context<Self>) {
+    pub fn add_fav(&mut self, author_id: u64, _cx: &mut Context<Self>) {
         println!("add_fav fn");
         println!("add_fav author_id: {}", author_id);
     }
