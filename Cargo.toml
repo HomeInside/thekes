@@ -15,7 +15,9 @@ categories = ["gui", "gpui-kit", "books"]
 build = "build.rs"
 
 [dependencies]
-gpui-kit = "=0.7.0"
+gpui-kit = "=0.7.3"
+directories = "=6.0.0"
+rusqlite = { version = "=0.40.2", features = ["bundled"] }
 
 [profile.dev]
 opt-level = 0
