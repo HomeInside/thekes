@@ -6,9 +6,9 @@ pub fn add_default_author(conn: &Connection) -> Result<(), Box<dyn Error>> {
     conn.execute(
         "INSERT INTO authors (
             name, last_name, birth_place, date_of_birth, date_of_death,
-            pseudonyms, alt_names, biography, genres, writing_lang
+            pseudonyms, alt_names, biography, genres, langs, writing_lang, cover_color, open_library_id, viaf_id
         )
-        SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10
+        SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14
         WHERE NOT EXISTS (
             SELECT 1 FROM authors
             WHERE name = ?1 AND last_name = ?2
@@ -17,13 +17,18 @@ pub fn add_default_author(conn: &Connection) -> Result<(), Box<dyn Error>> {
             "Arthur",
             "Conan Doyle",
             Some("Scotland"),
-            1859,
-            Some(1930),
+            "1859-05-22",
+            Some("1930-07-07"),
             Some("A. Conan Doyle"),
             Some("Sir Arthur Conan Doyle"),
-            "Escritor escocés, conocido por crear a Sherlock Holmes.",
+            "Sir Arthur Ignatius Conan Doyle KStJ, DL (22 May 1859 – 7 July 1930) was a Scottish writer and physician, most noted for creating the fictional detective Sherlock Holmes and writing stories about him which are generally considered milestones in the field of crime fiction. \
+            \nHe is also known for writing the fictional adventures of a second character he invented, Professor Challenger, and for popularising the mystery of the Mary Celeste. He was a prolific writer whose other works include fantasy and science fiction stories, plays, romances, poetry, non-fiction and historical novels.",
             "Novela policiaca, ficción histórica, ciencia ficción",
             Some("English"),
+            Some("English"),
+            Some(0xF4D5C2),
+            Some("OL161167A"),
+            Some("65283845"),
         ],
     )?;
     conn.execute(
