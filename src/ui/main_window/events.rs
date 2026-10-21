@@ -44,13 +44,14 @@ impl MainWindow {
                 self.show_author_form = false;
                 self.show_author_details = false;
             }
-            AuthorViewEvent::ShowDetails { id } => {
+            AuthorViewEvent::ShowDetails { info, books } => {
                 self.show_author_form = false;
                 self.show_author_details = true;
                 //2.
                 println!("handle_subs ShowDetails");
                 self.author_details.update(cx, |author_detail, cx| {
-                    author_detail.load_author_details(*id + 1, cx);
+                    author_detail.make_author_data(info, cx);
+                    author_detail.make_books_data(books, cx);
                 });
             }
         }

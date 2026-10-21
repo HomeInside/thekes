@@ -3,6 +3,8 @@ use crate::ui::main_window::ColorConfig;
 //use gpui_kit::AppContext;
 use crate::database::authors::model::AuthorModel;
 use crate::database::authors::service::AuthorService;
+use crate::database::books::model::BooksModel;
+use crate::database::books::service::BookService;
 use gpui_kit::IntoElement;
 use gpui_kit::assets::IconName as AssetIconName;
 use gpui_kit::component::ActiveTheme;
@@ -15,11 +17,11 @@ use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::*;
 use gpui_kit::{Context, Entity, Render, Styled, Window};
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub enum AuthorViewEvent {
     ShowForm,
     ShowList,
-    ShowDetails { id: i32 },
+    ShowDetails { info: AuthorModel, books: Vec<BooksModel> },
 }
 
 pub struct Authors {
@@ -28,6 +30,7 @@ pub struct Authors {
     pub(crate) authors_list: Vec<AuthorModel>,
     pub(crate) result_count: usize,
     pub(crate) author_service: AuthorService,
+    pub(crate) book_service: BookService,
 }
 
 impl EventEmitter<AuthorViewEvent> for Authors {}
