@@ -2,6 +2,7 @@ use super::AuthorViewEvent;
 use crate::database::DatabaseService;
 use crate::database::authors::model::AuthorModel;
 use crate::database::authors::service::AuthorService;
+use crate::database::books::model::BooksModel;
 use crate::ui::main_window::ColorConfig;
 use crate::utils::date_utils;
 use gpui_kit::IntoElement;
@@ -36,6 +37,7 @@ pub struct AuthorDetailModel {
 pub struct AuthorDetailsView {
     pub(crate) color_config: ColorConfig,
     pub(crate) author_detail: AuthorDetailModel,
+    pub(crate) books: Vec<BooksModel>,
     pub(crate) author_detail_service: AuthorService,
 }
 
@@ -45,9 +47,11 @@ impl AuthorDetailsView {
         Self {
             color_config: ColorConfig::default(),
             author_detail: AuthorDetailModel::default(),
+            books: Vec::new(),
             author_detail_service,
         }
     }
+
     pub fn gen_monogram(&self) -> String {
         let first = self.author_detail.name.chars().next().unwrap_or('?');
         let last = self.author_detail.last_name.chars().next();
@@ -58,6 +62,41 @@ impl AuthorDetailsView {
         }
     }
 
+    // TODO
+    pub fn make_books_data(&mut self, books: &Vec<BooksModel>, cx: &mut Context<Self>) {
+        println!("make_books_data fn");
+        if books.len() > 0 {
+            self.books = books.to_vec();
+        }
+    }
+
+    pub fn render_books(&self) -> impl IntoElement {
+        if self.books.len() > 0 {
+            v_flex()
+                .gap_2()
+                .child(div().text_sm().font_weight(FontWeight::SEMIBOLD).child("Otras obras"))
+                .children(self.books.iter().map(|book| {
+                    Self::book_card(
+                        book.title.clone(),
+                        book.published_date.to_string(),
+                        book.genres.clone().unwrap_or_else(|| "-".to_string()),
+                        0xB47B55,
+                        // 0x657DA0,
+                    )
+                }))
+        } else {
+            //no se encontraron libros del autor con ID: {}", author_id
+            v_flex().gap_2().child(
+                div()
+                    .text_sm()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .child("no se encontraron libros de este autor"),
+            )
+        }
+    }
+
+    ///usa los datos de `AuthorModel` y los
+    /// organiza para mostrarlos en la ui
     pub fn make_author_data(&mut self, author: &AuthorModel, cx: &mut Context<Self>) {
         self.author_detail.id = author.id;
         self.author_detail.name = author.name.clone();
@@ -85,7 +124,7 @@ impl AuthorDetailsView {
 
         self.author_detail.langs = match &author.langs {
             Some(langs) => langs.to_string(),
-            None => "-".to_string(),
+            None => "—".to_string(),
         };
 
         let cover_color = match &author.cover_color {
@@ -113,23 +152,6 @@ impl AuthorDetailsView {
         h_flex().flex_wrap().gap_2().child(Self::tag("no definidas".into()))
         //.child(Self::tag("Edward Lear".into()))
         //.child(Self::tag("Nonsense literario".into())),
-    }
-
-    pub fn load_author_details(&mut self, item_id: i32, cx: &mut Context<Self>) {
-        println!("Authors::load_authors fn");
-        match self.author_detail_service.get_one(item_id) {
-            Ok(Some(author)) => {
-                println!("Autor encontrado: {:?}", author);
-                self.make_author_data(&author, cx);
-            }
-            Ok(None) => {
-                eprintln!("no se encontró el autor con ID: {}", item_id);
-            }
-            Err(error) => {
-                eprintln!("Error al consultar por Id de autor: {error}");
-            }
-        }
-        cx.notify();
     }
 
     fn meta_link(
@@ -223,12 +245,7 @@ impl AuthorDetailsView {
             .child(content)
     }
 
-    fn book_card(
-        title: &'static str,
-        year: &'static str,
-        description: &'static str,
-        cover_color: u32,
-    ) -> impl IntoElement {
+    fn book_card(title: String, year: String, description: String, cover_color: u32) -> impl IntoElement {
         h_flex()
             .w_full()
             .items_center()
@@ -508,15 +525,15 @@ impl Render for AuthorDetailsView {
                             .child(div().text_sm().font_weight(FontWeight::MEDIUM).child("Influencias"))
                             .child(self.make_influences()),
                     ))
-                    // TODO vamos por aqui
-                    /*
                     .child(Self::section(
                         "Bibliografía",
                         "Obras destacadas y publicaciones del autor",
                         IconName::BookOpen,
                         v_flex()
                             .gap_4()
+                            // TODO vamos por aqui
                             // Obras destacadas
+                            /*
                             .child(
                                 h_flex()
                                     .w_full()
@@ -536,26 +553,10 @@ impl Render for AuthorDetailsView {
                                         "MIRROR",
                                     )),
                             )
+                            */
                             // lista secundaria
-                            .child(div().text_sm().font_weight(FontWeight::SEMIBOLD).child("Otras obras"))
-                            .child(
-                                v_flex()
-                                    .gap_2()
-                                    .child(Self::book_card(
-                                        "The Hunting of the Snark",
-                                        "1876",
-                                        "Poema narrativo",
-                                        0xB47B55,
-                                    ))
-                                    .child(Self::book_card(
-                                        "Sylvie and Bruno",
-                                        "1889",
-                                        "Novela · Fantasía",
-                                        0x657DA0,
-                                    )),
-                            ),
+                            .child(self.render_books()),
                     ))
-                    */
                     //
                     // referencias
                     .child(Self::section(

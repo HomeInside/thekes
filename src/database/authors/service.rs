@@ -35,7 +35,7 @@ impl AuthorService {
 
         repository::all_authors(&conn)
     }
-    //pub fn get_one(&self, item_id: i32) -> Result<AuthorModel> {
+
     pub fn get_one(&self, item_id: i32) -> Result<Option<AuthorModel>> {
         println!("AuthorService::get_one fn");
         let conn = self.db.get_conn().lock().map_err(|_| rusqlite::Error::InvalidQuery)?;
