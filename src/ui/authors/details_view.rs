@@ -1,34 +1,195 @@
 use super::AuthorViewEvent;
+use crate::database::DatabaseService;
+use crate::database::authors::model::AuthorModel;
+use crate::database::authors::service::AuthorService;
 use crate::ui::main_window::ColorConfig;
 use gpui_kit::IntoElement;
+use gpui_kit::base::Link;
 use gpui_kit::component::button::{Button, ButtonVariants};
 use gpui_kit::component::scroll::ScrollableElement;
 use gpui_kit::component::{Icon, IconName};
 use gpui_kit::component::{h_flex, v_flex};
 use gpui_kit::*;
 use gpui_kit::{Context, Render, Styled, Window};
+use std::sync::Arc;
+
+#[derive(Clone, Debug, Default)]
+pub struct AuthorDetailModel {
+    pub(crate) id: i32,
+    pub(crate) name: String,
+    pub(crate) last_name: String,
+    pub(crate) names: String,
+    pub(crate) birth_place: String,
+    pub(crate) date_of_birth: String,
+    pub(crate) date_of_death: String,
+    pub(crate) genres: String,
+    pub(crate) biography: String,
+    pub(crate) description: String,
+    pub(crate) langs: String,
+    pub(crate) cover_color: u32,
+    //pub(crate) ol_id: String,
+    //pub(crate) viaf_id: String,
+    pub(crate) ol_id: Option<String>,
+    pub(crate) viaf_id: Option<String>,
+}
 
 #[allow(dead_code)]
 pub struct AuthorDetailsView {
     pub(crate) color_config: ColorConfig,
+    pub(crate) author_detail: AuthorDetailModel,
+    pub(crate) author_detail_service: AuthorService,
 }
 
 impl AuthorDetailsView {
-    pub fn new(_window: &mut Window, _cx: &mut Context<Self>) -> Self {
+    pub fn new(_window: &mut Window, _cx: &mut Context<Self>, db: Arc<DatabaseService>) -> Self {
+        let author_detail_service = AuthorService::new(db.clone());
         Self {
             color_config: ColorConfig::default(),
+            author_detail: AuthorDetailModel::default(),
+            author_detail_service,
+        }
+    }
+    pub fn gen_monogram(&self) -> String {
+        let first = self.author_detail.name.chars().next().unwrap_or('?');
+        let last = self.author_detail.last_name.chars().next();
+
+        match last {
+            Some(last) => format!("{}{}", first.to_uppercase(), last.to_uppercase()),
+            None => first.to_uppercase().to_string(),
         }
     }
 
+    pub fn make_author_data(&mut self, author: &AuthorModel, cx: &mut Context<Self>) {
+        self.author_detail.id = author.id;
+        self.author_detail.name = author.name.clone();
+        self.author_detail.last_name = author.last_name.clone();
+        self.author_detail.names = format!("{} {}", author.name.clone(), author.last_name.clone());
+
+        let birth_info = match &author.birth_place {
+            Some(birth_place) => birth_place,
+            None => &"-".to_string(),
+        };
+
+        self.author_detail.birth_place = birth_info.to_string();
+
+        // Nacimiento: 27 de enero de 1832
+        // Fallecimiento: 14 de enero de 1898
+        self.author_detail.date_of_birth = author.date_of_birth.clone();
+
+        let lifespan = match &author.date_of_death {
+            //Some(death_year) => format!("{} — {}", author.date_of_birth.clone(), death_year),
+            Some(death_year) => death_year,
+            //None => format!("{} — actualidad", author.date_of_birth),
+            None => &"-".to_string(),
+        };
+        self.author_detail.date_of_death = lifespan.to_string();
+
+        self.author_detail.genres = author.genres.clone();
+        self.author_detail.biography = author.biography.clone();
+        self.author_detail.description = "sin descripción".into();
+
+        let lang_info = match &author.langs {
+            Some(langs) => langs,
+            None => &"-".to_string(),
+        };
+
+        self.author_detail.langs = lang_info.to_string();
+        self.author_detail.langs = lang_info.to_string();
+
+        let cover_color = match &author.cover_color {
+            Some(color) => *color,
+            None => 0xF4D5C2,
+        };
+
+        self.author_detail.cover_color = cover_color;
+        /*
+        self.author_detail.ol_id = match &author.open_library_id {
+            Some(olid) => olid.to_string(),
+            None => "OLID: no vinculado".to_string(),
+        };
+        self.author_detail.viaf_id = match &author.viaf_id {
+            Some(viaf) => viaf.to_string(),
+            None => "VIAF: no vinculado".to_string(),
+        };
+        */
+        self.author_detail.ol_id = author.open_library_id.clone();
+        self.author_detail.viaf_id = author.viaf_id.clone();
+    }
+
+    pub fn make_tags(&self) -> impl IntoElement {
+        h_flex().flex_wrap().gap_2().children(
+            self.author_detail
+                .genres
+                .split(',')
+                .map(|genre| Self::tag(genre.trim().to_string())),
+        )
+    }
+
+    // TODO
+    pub fn make_influences(&self) -> impl IntoElement {
+        h_flex().flex_wrap().gap_2().child(Self::tag("no definidas".into()))
+        //.child(Self::tag("Edward Lear".into()))
+        //.child(Self::tag("Nonsense literario".into())),
+    }
+
+    pub fn load_author_details(&mut self, item_id: i32, cx: &mut Context<Self>) {
+        println!("Authors::load_authors fn");
+        match self.author_detail_service.get_one(item_id) {
+            Ok(Some(author)) => {
+                println!("Autor encontrado: {:?}", author);
+                //self.author_detail = author;
+                self.make_author_data(&author, cx);
+            }
+            Ok(None) => {
+                eprintln!("no se encontró el autor con ID: {}", item_id);
+            }
+            Err(error) => {
+                eprintln!("Error al consultar por Id de autor: {error}");
+            }
+        }
+        cx.notify();
+    }
+
+    fn meta_link(
+        id: &'static str,
+        label: &'static str,
+        value: Option<String>,
+        base_url: &'static str,
+    ) -> impl IntoElement {
+        v_flex()
+            .gap_1()
+            .child(div().text_xs().text_color(rgb(0x85837D)).child(label))
+            .child(match value {
+                Some(value) => {
+                    let url = format!("{base_url}{value}");
+
+                    //div().child(Link::new(id).href(url).child(value))
+                    Link::new(id)
+                        .href(url)
+                        .cursor_pointer()
+                        .open_with(|href, _, _, cx| cx.open_url(href))
+                        .child(
+                            h_flex()
+                                .gap_1()
+                                .items_center()
+                                .child(div().text_sm().font_weight(FontWeight::MEDIUM).child(value))
+                                .child(Icon::new(IconName::ExternalLink).size_3()),
+                        )
+                        .into_any_element()
+                }
+                None => div().text_sm().child("No vinculado").into_any_element(),
+            })
+    }
+
     //
-    fn metadata(label: &'static str, value: &'static str) -> impl IntoElement {
+    fn metadata(label: &'static str, value: String) -> impl IntoElement {
         v_flex()
             .gap_1()
             .child(div().text_xs().text_color(rgb(0x85837D)).child(label))
             .child(div().text_sm().font_weight(FontWeight::MEDIUM).child(value))
     }
 
-    fn tag(value: &'static str) -> impl IntoElement {
+    fn tag(value: String) -> impl IntoElement {
         div()
             .px_3()
             .py_1()
@@ -264,9 +425,10 @@ impl Render for AuthorDetailsView {
                                                             .text_size(px(48.))
                                                             .font_weight(FontWeight::SEMIBOLD)
                                                             .text_color(rgb(0x977657))
-                                                            .child("LC"),
+                                                            //iniciales
+                                                            .child(self.gen_monogram()),
                                                     ),
-                                            )
+                                            ),
                                     )
                                     //
                                     // Información principal
@@ -281,36 +443,47 @@ impl Render for AuthorDetailsView {
                                                 div()
                                                     .text_size(px(30.))
                                                     .font_weight(FontWeight::SEMIBOLD)
-                                                    .child("Lewis Carroll"),
+                                                    .child(self.author_detail.names.clone()),
                                             )
                                             .child(
                                                 div()
                                                     .text_base()
                                                     .text_color(rgb(0x625F59))
-                                                    //.text_sm()
-                                                    .child("Escritor, matemático y fotógrafo británico."),
-                                                )
-                                                .child(
-                                                    div()
+                                                    .child(self.author_detail.description.clone()),
+                                            )
+                                            .child(
+                                                div()
                                                     .text_base()
                                                     //.text_color(rgb(0x85837D))
                                                     .text_color(rgb(0x625F59))
                                                     .text_sm()
-                                                    .child("Nombre real: Charles Lutwidge Dodgson"),
+                                                    .child(format!(
+                                                        "Nombre real: {}",
+                                                        self.author_detail.names.clone()
+                                                    )),
                                             )
                                             .child(
                                                 h_flex()
                                                     .flex_wrap()
                                                     .gap_6()
-                                                    .child(Self::metadata("Nacimiento", "27 de enero de 1832"))
-                                                    .child(Self::metadata("Fallecimiento", "14 de enero de 1898")),
+                                                    .child(Self::metadata(
+                                                        "Nacimiento",
+                                                        self.author_detail.date_of_birth.clone(),
+                                                    ))
+                                                    .child(Self::metadata(
+                                                        "Fallecimiento",
+                                                        self.author_detail.date_of_death.clone(),
+                                                    )),
                                             )
                                             .child(
                                                 h_flex()
                                                     .flex_wrap()
                                                     .gap_6()
-                                                    .child(Self::metadata("Nacionalidad", "Británica"))
-                                                    .child(Self::metadata("Idioma", "Inglés")),
+                                                    .child(Self::metadata(
+                                                        "Nacionalidad",
+                                                        self.author_detail.birth_place.clone(),
+                                                    ))
+                                                    .child(Self::metadata("Idiomas", self.author_detail.langs.clone())),
                                             ),
                                     ), //
                             )
@@ -321,13 +494,17 @@ impl Render for AuthorDetailsView {
                                     "Biografía",
                                     "Vida y trayectoria literaria",
                                     IconName::BookOpen,
-                                    v_flex()
-                                        .gap_2()
-                                        .child(div().text_sm().text_color(rgb(0x45433F)).child(
-                                            "The Reverend Charles Lutwidge Dodgson, better known by the pen name Lewis Carroll, was an English author, mathematician, logician, Anglican clergyman and photographer.His most famous writings are Alice's Adventures in Wonderland and its sequel Through the Looking-Glass as well as the poems \"The Hunting of the Snark\" and \"Jabberwocky\", all considered to be within the genre of literary nonsense.Oxford scholar, Church of England Deacon, University Lecturer in Mathematics and Logic, academic author of learned theses, gifted pioneer of portrait photography, colourful writer of imaginative genius and yet a shy and pedantic man, Lewis Carroll stands pre-eminent in the pantheon of inventive literary geniuses.He also has works published under his real name.",
-                                        )),
+                                    v_flex().gap_2().child(
+                                        div()
+                                            .text_sm()
+                                            .text_color(rgb(0x45433F))
+                                            // si la biografía es muy larga...
+                                            .line_clamp(9)
+                                            .text_ellipsis()
+                                            .child(self.author_detail.biography.clone()),
+                                    ),
                                 )),
-                            )
+                            ),
                     )
                     //
                     // Perfil literario
@@ -344,30 +521,13 @@ impl Render for AuthorDetailsView {
                                     .font_weight(FontWeight::MEDIUM)
                                     .child("Géneros literarios"),
                             )
-                            .child(
-                                h_flex()
-                                    .flex_wrap()
-                                    .gap_2()
-                                    .child(Self::tag("Literatura infantil"))
-                                    .child(Self::tag("Fantasía"))
-                                    .child(Self::tag("Poesía"))
-                                    .child(Self::tag("Ficción"))
-                                    //
-                                    .child(Self::tag("uno"))
-                                    .child(Self::tag("dos"))
-                                    .child(Self::tag("aqui van"))
-                                    .child(Self::tag("tres o cuatro casi"))
-                                    .child(Self::tag("cinco")),
-                            )
+                            .child(self.make_tags())
+                            //
                             .child(div().text_sm().font_weight(FontWeight::MEDIUM).child("Influencias"))
-                            .child(
-                                h_flex()
-                                    .flex_wrap()
-                                    .gap_2()
-                                    .child(Self::tag("Edward Lear"))
-                                    .child(Self::tag("Nonsense literario")),
-                            ),
+                            .child(self.make_influences()),
                     ))
+                    // TODO vamos por aqui
+                    /*
                     .child(Self::section(
                         "Bibliografía",
                         "Obras destacadas y publicaciones del autor",
@@ -413,6 +573,7 @@ impl Render for AuthorDetailsView {
                                     )),
                             ),
                     ))
+                    */
                     //
                     // referencias
                     .child(Self::section(
@@ -421,8 +582,18 @@ impl Render for AuthorDetailsView {
                         IconName::ExternalLink,
                         v_flex()
                             .gap_3()
-                            .child(Self::metadata("OPEN LIBRARY", "OL22098A"))
-                            .child(Self::metadata("VIAF", "Pendiente de vincular")),
+                            .child(Self::meta_link(
+                                "open-library-link",
+                                "OPEN LIBRARY",
+                                self.author_detail.ol_id.clone(),
+                                "https://openlibrary.org/authors/",
+                            ))
+                            .child(Self::meta_link(
+                                "viaf-link",
+                                "VIAF",
+                                self.author_detail.viaf_id.clone(),
+                                "https://viaf.org/viaf/",
+                            )),
                     )),
             )
     }
