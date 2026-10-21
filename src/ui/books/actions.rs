@@ -1,4 +1,6 @@
 use super::Books;
+use crate::database::books::model::BooksModel;
+use crate::database::books::service::BookService;
 use gpui_kit::Action;
 use gpui_kit::{Context, Window};
 
@@ -20,6 +22,30 @@ pub struct BookAction {
 
 //acciones/eventos
 impl Books {
+    // TO FIX
+    // GPUI-Kit todavía no tiene inicializado el estado de
+    // notificaciones cuando se llama `load_books()` desde
+    // `Books::new()` ó `MainWindow::new()`, por lo que
+    // no se puede usar `window: &mut Window` para usar las
+    // notificaciones, hay que buscar otra solución
+    pub fn load_books(&mut self, cx: &mut Context<Self>) {
+        println!("Books::load_authors fn");
+        match self.book_service.get_all() {
+            Ok(list) => {
+                println!("libros encontrados: {}", list.len());
+                self.result_count = list.len();
+                self.book_list = list;
+                // organizar la ui aqui
+                //window.push_notification((NotificationType::Success, "libros cargados"), cx);
+            }
+            Err(error) => {
+                eprintln!("Error al consultar libros: {error}");
+                //window.push_notification((NotificationType::Error, "Error al consultar libros"), cx);
+            }
+        }
+        cx.notify();
+    }
+
     pub fn click_btn_new_book(&mut self, _cx: &mut Context<Self>) {
         println!("click_btn_new_book fn");
     } //click_btn_new_book
@@ -28,8 +54,8 @@ impl Books {
         let text_search = self.input_search.read(cx).value().to_string();
         println!("input_search: {}", text_search);
 
-        self.all_books = Self::find_books(&text_search);
-        self.result_count = self.all_books.len();
+        self.book_list = self.find_books(&text_search);
+        self.result_count = self.book_list.len();
         cx.notify();
     } //click_btn_search
 
