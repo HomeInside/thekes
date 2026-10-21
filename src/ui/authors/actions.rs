@@ -127,7 +127,9 @@ impl Authors {
         let button_id = format!("author-menu-{}", author.id);
         let full_name = format!("{} {}", author.name, author.last_name);
         let initials = Self::gen_monogram(author);
-        let accent = rgb(author.cover_color);
+
+        let cover_color = author.cover_color.clone().unwrap_or_else(|| 0xF4D5C2);
+        let accent = rgb(cover_color);
 
         div()
             /*
@@ -290,14 +292,19 @@ impl Authors {
             )
     }
 
-    // TO REMOVE
-    fn author_metadata(author: &AuthorModel) -> (&'static str, &'static str, &'static str) {
-        match author.id {
-            1 => ("Colombia", "1927 — 2014", "Realismo mágico"),
-            2 => ("Reino Unido", "1882 — 1941", "Modernismo"),
-            3 => ("Argentina", "1899 — 1986", "Cuento · Ensayo"),
-            _ => ("Por determinar", "Fechas desconocidas", "Género no definido"),
-        }
+    //READY
+    fn author_metadata(author: &AuthorModel) -> (String, String, String) {
+        let birth_place = author
+            .birth_place
+            .clone()
+            .unwrap_or_else(|| "Lugar desconocido".to_string());
+
+        let lifespan = match &author.date_of_death {
+            Some(death_year) => format!("{} — {}", author.date_of_birth, death_year),
+            None => author.date_of_birth.to_string(),
+        };
+
+        (birth_place, lifespan, author.genres.clone())
     }
 
     // TODO
