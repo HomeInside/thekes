@@ -11,6 +11,8 @@ mod ui;
 mod utils;
 use crate::ui::main_window::MainWindow;
 use crate::utils::consts;
+use database::DatabaseService;
+use std::sync::{Arc, Mutex};
 
 icon_assets!(
     ExtraIcons,
@@ -60,6 +62,10 @@ impl AssetSource for AppAssets {
 
 fn main() {
     let app = gpui_kit::application().with_assets(AppAssets);
+    //let connection = manage::connect()?;
+    let conn = database::connect().expect("unable create database connect");
+    database::init_db(&conn).expect("unable init_db database");
+    let db = Arc::new(DatabaseService::new(conn));
 
     app.run(move |cx| {
         gpui_kit::init(cx);
@@ -78,7 +84,7 @@ fn main() {
                 true
             });
 
-            cx.new(|cx| MainWindow::new(window, cx))
+            cx.new(|cx| MainWindow::new(window, cx, db))
         })
         .expect("Failed to open main window");
     });
