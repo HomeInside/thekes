@@ -1,6 +1,6 @@
 use super::seed::add_default_author;
 use crate::utils::file_utils;
-use rusqlite::{Connection, OpenFlags, Result, params};
+use rusqlite::{Connection, OpenFlags, Result};
 use std::error::Error;
 
 pub fn connect() -> Result<Connection, Box<dyn Error>> {
@@ -21,11 +21,24 @@ pub fn init_db(conn: &Connection) -> Result<(), Box<dyn Error>> {
         "
     -- books
     CREATE TABLE IF NOT EXISTS books(
-        id   INTEGER not null primary key autoincrement,
-        name TEXT    not null,
-        author_id INTEGER    not null,
-        year INTEGER not null,
-        isbn TEXT    not null
+        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        author_id INTEGER NOT NULL,
+        synopsis TEXT NOT NULL,
+        lang TEXT NOT NULL,
+        cover TEXT NULL,
+        cover_bytes BLOB NULL,
+        page_count INTEGER NOT NULL,
+        format_type TEXT NOT NULL,
+        genres TEXT NULL,
+        subjects TEXT NULL,
+        published_date INTEGER NULL,
+        publisher TEXT NULL,
+        open_library_id TEXT NULL,
+        isbn TEXT NULL,
+        buy TEXT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT NULL DEFAULT CURRENT_TIMESTAMP
 	);
     -- authors
     CREATE TABLE IF NOT EXISTS authors(
