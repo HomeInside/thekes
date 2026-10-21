@@ -1,5 +1,5 @@
 use super::{AuthorViewEvent, Authors};
-use crate::database::authors::{AUTHORS_LIST, AuthorsItem};
+use crate::database::authors::model::AuthorModel;
 use crate::ui::main_window::ColorConfig;
 use gpui_kit::Action;
 use gpui_kit::AppContext;
@@ -13,9 +13,14 @@ use gpui_kit::component::h_flex;
 use gpui_kit::component::input::InputState;
 use gpui_kit::component::menu::DropdownMenu;
 //use gpui_kit::prelude::FluentBuilder;
+use crate::database::DatabaseService;
+use crate::database::authors::service::AuthorService;
+use gpui_kit::component::WindowExt;
+use gpui_kit::component::notification::NotificationType;
 use gpui_kit::rgb;
 use gpui_kit::*;
 use gpui_kit::{Context, Styled, Window};
+use std::sync::Arc;
 
 #[derive(Clone, PartialEq)]
 pub enum AuthorOperation {
@@ -32,24 +37,53 @@ pub struct AuthorAction {
 
 // métodos/acciones/eventos
 impl Authors {
-    pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+    //pub fn new(window: &mut Window, cx: &mut Context<Self>, author_service: AuthorService) -> Self {
+    pub fn new(window: &mut Window, cx: &mut Context<Self>, db: Arc<DatabaseService>) -> Self {
+        //let author_service = AuthorService::new((*db).clone());
+        let author_service = AuthorService::new(db.clone());
+
         Self {
             color_config: ColorConfig::default(),
             input_search: cx.new(|cx| InputState::new(window, cx).placeholder("Buscar por nombre...")),
-            all_authors: Self::find_authors(""),
-            result_count: AUTHORS_LIST.len(),
+            authors_list: Vec::new(),
+            result_count: 0,
+            author_service,
         }
     }
 
-    pub fn find_authors(query: &str) -> Vec<AuthorsItem> {
+    // TO FIX
+    // GPUI-Kit todavía no tiene inicializado el estado de
+    // notificaciones cuando se llama `load_authors()` desde
+    // `Authors::new()` ó `MainWindow::new()`, por lo que
+    // no se puede usar `window: &mut Window` para usar las
+    // notificaciones, hay que buscar otra solución
+    pub fn load_authors(&mut self, cx: &mut Context<Self>) {
+        println!("Authors::load_authors fn");
+        match self.author_service.get_all() {
+            Ok(list) => {
+                println!("Autores encontrados: {}", list.len());
+                self.result_count = list.len();
+                self.authors_list = list;
+                // organizar la ui aqui
+                //window.push_notification((NotificationType::Success, "autores cargados"), cx);
+            }
+            Err(error) => {
+                eprintln!("Error al consultar autores: {error}");
+                //window.push_notification((NotificationType::Error, "Error al consultar autores"), cx);
+            }
+        }
+        cx.notify();
+    }
+
+    pub fn find_authors(&self, query: &str) -> Vec<AuthorModel> {
         let query = query.trim().to_lowercase();
 
-        AUTHORS_LIST
+        self.authors_list
             .iter()
             .filter(|author| {
                 query.is_empty()
                     || author.name.to_lowercase().contains(&query)
-                    || author.lastname.to_lowercase().contains(&query)
+                    || author.last_name.to_lowercase().contains(&query)
             })
             .cloned()
             .collect()
@@ -66,8 +100,8 @@ impl Authors {
         let text_search = self.input_search.read(cx).value().to_string();
         println!("input_search: {}", text_search);
 
-        self.all_authors = Self::find_authors(&text_search);
-        self.result_count = self.all_authors.len();
+        self.authors_list = self.find_authors(&text_search);
+        self.result_count = self.authors_list.len();
         cx.notify();
     } //click_btn_search
 
@@ -77,12 +111,12 @@ impl Authors {
             .flex()
             .flex_col()
             .gap_1()
-            .children(self.all_authors.iter().map(|author| self.author_row(author)))
+            .children(self.authors_list.iter().map(|author| self.author_row(author)))
     }
 
-    pub fn gen_monogram(author: &AuthorsItem) -> String {
+    pub fn gen_monogram(author: &AuthorModel) -> String {
         let first = author.name.chars().next().unwrap_or('?');
-        let last = author.lastname.chars().next();
+        let last = author.last_name.chars().next();
 
         match last {
             Some(last) => format!("{}{}", first.to_uppercase(), last.to_uppercase()),
@@ -90,10 +124,10 @@ impl Authors {
         }
     }
 
-    pub fn author_row(&self, author: &AuthorsItem) -> impl IntoElement {
+    pub fn author_row(&self, author: &AuthorModel) -> impl IntoElement {
         let author_id = author.id;
         let button_id = format!("author-menu-{}", author.id);
-        let full_name = format!("{} {}", author.name, author.lastname);
+        let full_name = format!("{} {}", author.name, author.last_name);
         let initials = Self::gen_monogram(author);
         let accent = rgb(author.cover_color);
 
@@ -178,7 +212,7 @@ impl Authors {
                                 "Favorito",
                                 IconName::Heart,
                                 Box::new(AuthorAction {
-                                    author_id,
+                                    author_id: author_id as u64,
                                     author_op: AuthorOperation::Favorite,
                                 }),
                             )
@@ -187,7 +221,7 @@ impl Authors {
                                 "Detalles",
                                 AssetIconName::BookText,
                                 Box::new(AuthorAction {
-                                    author_id,
+                                    author_id: author_id as u64,
                                     author_op: AuthorOperation::Details,
                                 }),
                             )
@@ -259,7 +293,7 @@ impl Authors {
     }
 
     // TO REMOVE
-    fn author_metadata(author: &AuthorsItem) -> (&'static str, &'static str, &'static str) {
+    fn author_metadata(author: &AuthorModel) -> (&'static str, &'static str, &'static str) {
         match author.id {
             1 => ("Colombia", "1927 — 2014", "Realismo mágico"),
             2 => ("Reino Unido", "1882 — 1941", "Modernismo"),
