@@ -1,0 +1,28 @@
+#[derive(Clone, Debug, Default)]
+pub struct AuthorModel {
+    pub id: i32,
+    pub name: String,
+    pub last_name: String,
+    pub birth_place: Option<String>,
+    pub date_of_birth: i32,
+    pub date_of_death: Option<i32>,
+    pub place_of_death: Option<String>,
+    pub pseudonyms: Option<String>,
+    pub alt_names: Option<String>,
+    pub biography: String,
+    pub genres: String,
+    pub writing_lang: Option<String>,
+    pub notes: Option<String>,
+    pub movements_or_trends: Option<String>,
+    pub influences: Option<String>,
+    pub picture_bytes: Option<Vec<u8>>,
+    pub picture_url: Option<String>,
+    pub open_library_id: Option<String>,
+    pub inventaire_id: Option<String>,
+    pub viaf_id: Option<String>,
+    pub website: Option<String>,
+    pub created_at: String,
+    pub updated_at: Option<String>,
+    //
+    pub(crate) cover_color: u32,
+}
