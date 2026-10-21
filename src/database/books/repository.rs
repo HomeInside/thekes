@@ -33,6 +33,22 @@ pub fn all_books(conn: &Connection) -> Result<Vec<BooksModel>, Error> {
     // result
 }
 
+pub fn all_books_by_author(conn: &Connection, item_id: i32) -> Result<Vec<BooksModel>, Error> {
+    let mut stmt = conn.prepare("SELECT id, title, published_date, genres FROM books where author_id = :author_id")?;
+
+    let books_list = stmt.query_map(params![item_id], |row| {
+        Ok(BooksModel {
+            id: row.get(0)?,
+            title: row.get(1)?,
+            published_date: row.get(2)?,
+            genres: row.get(3)?,
+            ..Default::default()
+        })
+    })?;
+
+    books_list.collect()
+}
+
 #[allow(dead_code)]
 pub fn delete_book(conn: &Connection, id: i32) -> Result<usize> {
     println!("delete_book fn: {}", id);

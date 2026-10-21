@@ -34,6 +34,12 @@ impl BookService {
 
         repository::all_books(&conn)
     }
+    pub fn by_author(&self, item_id: i32) -> Result<Vec<BooksModel>> {
+        println!("BookService::by_author fn");
+        let conn = self.db.get_conn().lock().map_err(|_| rusqlite::Error::InvalidQuery)?;
+
+        repository::all_books_by_author(&conn, item_id)
+    }
 
     pub fn create_book(&self, author: &BooksModel) -> Result<usize> {
         let conn = self.db.get_conn().lock().map_err(|_| rusqlite::Error::InvalidQuery)?;
