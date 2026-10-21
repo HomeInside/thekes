@@ -12,7 +12,7 @@ mod utils;
 use crate::ui::main_window::MainWindow;
 use crate::utils::consts;
 use database::DatabaseService;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 icon_assets!(
     ExtraIcons,

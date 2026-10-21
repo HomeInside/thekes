@@ -330,7 +330,7 @@ impl Render for AuthorFormView {
                         Button::new("btn-author-form-save")
                             .primary()
                             .label("Crear")
-                            .on_click(cx.listener(|_this, _, _, cx| {
+                            .on_click(cx.listener(|_this, _, _, _cx| {
                                 println!("btn-author-form-save fn");
                             })),
                     ),

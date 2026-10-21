@@ -15,8 +15,6 @@ use gpui_kit::component::menu::DropdownMenu;
 //use gpui_kit::prelude::FluentBuilder;
 use crate::database::DatabaseService;
 use crate::database::authors::service::AuthorService;
-use gpui_kit::component::WindowExt;
-use gpui_kit::component::notification::NotificationType;
 use gpui_kit::rgb;
 use gpui_kit::*;
 use gpui_kit::{Context, Styled, Window};
