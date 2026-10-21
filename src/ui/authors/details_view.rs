@@ -3,6 +3,7 @@ use crate::database::DatabaseService;
 use crate::database::authors::model::AuthorModel;
 use crate::database::authors::service::AuthorService;
 use crate::ui::main_window::ColorConfig;
+use crate::utils::date_utils;
 use gpui_kit::IntoElement;
 use gpui_kit::base::Link;
 use gpui_kit::component::button::{Button, ButtonVariants};
@@ -27,8 +28,6 @@ pub struct AuthorDetailModel {
     pub(crate) description: String,
     pub(crate) langs: String,
     pub(crate) cover_color: u32,
-    //pub(crate) ol_id: String,
-    //pub(crate) viaf_id: String,
     pub(crate) ol_id: Option<String>,
     pub(crate) viaf_id: Option<String>,
 }
@@ -65,36 +64,29 @@ impl AuthorDetailsView {
         self.author_detail.last_name = author.last_name.clone();
         self.author_detail.names = format!("{} {}", author.name.clone(), author.last_name.clone());
 
-        let birth_info = match &author.birth_place {
-            Some(birth_place) => birth_place,
-            None => &"-".to_string(),
+        // lugar de nacimiento
+        self.author_detail.birth_place = match &author.birth_place {
+            Some(birth_place) => birth_place.to_string(),
+            None => "-".to_string(),
         };
 
-        self.author_detail.birth_place = birth_info.to_string();
+        // fecha de nacimiento
+        self.author_detail.date_of_birth = date_utils::date_to_local_string(author.date_of_birth.clone(), "en");
 
-        // Nacimiento: 27 de enero de 1832
-        // Fallecimiento: 14 de enero de 1898
-        self.author_detail.date_of_birth = author.date_of_birth.clone();
-
-        let lifespan = match &author.date_of_death {
-            //Some(death_year) => format!("{} — {}", author.date_of_birth.clone(), death_year),
-            Some(death_year) => death_year,
-            //None => format!("{} — actualidad", author.date_of_birth),
-            None => &"-".to_string(),
+        // fecha de fallecimiento
+        self.author_detail.date_of_death = match &author.date_of_death {
+            Some(death_year) => date_utils::date_to_local_string(death_year.to_string(), "en"),
+            None => "—".to_string(),
         };
-        self.author_detail.date_of_death = lifespan.to_string();
 
         self.author_detail.genres = author.genres.clone();
         self.author_detail.biography = author.biography.clone();
         self.author_detail.description = "sin descripción".into();
 
-        let lang_info = match &author.langs {
-            Some(langs) => langs,
-            None => &"-".to_string(),
+        self.author_detail.langs = match &author.langs {
+            Some(langs) => langs.to_string(),
+            None => "-".to_string(),
         };
-
-        self.author_detail.langs = lang_info.to_string();
-        self.author_detail.langs = lang_info.to_string();
 
         let cover_color = match &author.cover_color {
             Some(color) => *color,
@@ -102,16 +94,7 @@ impl AuthorDetailsView {
         };
 
         self.author_detail.cover_color = cover_color;
-        /*
-        self.author_detail.ol_id = match &author.open_library_id {
-            Some(olid) => olid.to_string(),
-            None => "OLID: no vinculado".to_string(),
-        };
-        self.author_detail.viaf_id = match &author.viaf_id {
-            Some(viaf) => viaf.to_string(),
-            None => "VIAF: no vinculado".to_string(),
-        };
-        */
+
         self.author_detail.ol_id = author.open_library_id.clone();
         self.author_detail.viaf_id = author.viaf_id.clone();
     }
