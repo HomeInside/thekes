@@ -120,7 +120,6 @@ impl AuthorDetailsView {
         match self.author_detail_service.get_one(item_id) {
             Ok(Some(author)) => {
                 println!("Autor encontrado: {:?}", author);
-                //self.author_detail = author;
                 self.make_author_data(&author, cx);
             }
             Ok(None) => {

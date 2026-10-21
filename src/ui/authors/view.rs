@@ -19,7 +19,7 @@ use gpui_kit::{Context, Entity, Render, Styled, Window};
 pub enum AuthorViewEvent {
     ShowForm,
     ShowList,
-    ShowDetails,
+    ShowDetails { id: i32 },
 }
 
 pub struct Authors {

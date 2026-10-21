@@ -29,7 +29,7 @@ pub enum AuthorOperation {
 #[derive(Action, Clone, PartialEq)]
 #[action(namespace = view_book, no_json)]
 pub struct AuthorAction {
-    pub author_id: u64,
+    pub author_id: i32,
     pub author_op: AuthorOperation,
 }
 
@@ -212,7 +212,7 @@ impl Authors {
                                 "Favorito",
                                 IconName::Heart,
                                 Box::new(AuthorAction {
-                                    author_id: author_id as u64,
+                                    author_id,
                                     author_op: AuthorOperation::Favorite,
                                 }),
                             )
@@ -221,7 +221,7 @@ impl Authors {
                                 "Detalles",
                                 AssetIconName::BookText,
                                 Box::new(AuthorAction {
-                                    author_id: author_id as u64,
+                                    author_id,
                                     author_op: AuthorOperation::Details,
                                 }),
                             )
@@ -308,16 +308,15 @@ impl Authors {
     }
 
     // TODO
-    pub fn add_fav(&mut self, author_id: u64, _cx: &mut Context<Self>) {
-        println!("add_fav fn");
+    pub fn add_fav(&mut self, author_id: i32, _cx: &mut Context<Self>) {
         println!("add_fav author_id: {}", author_id);
     }
 
-    pub fn show_details(&mut self, author_id: u64, cx: &mut Context<Self>) {
-        println!("show_details fn");
+    pub fn show_details(&mut self, author_id: i32, cx: &mut Context<Self>) {
+        //1.
         println!("show_details author_id: {}", author_id);
         println!("enviando evento ShowDetails");
-        cx.emit(AuthorViewEvent::ShowDetails);
+        cx.emit(AuthorViewEvent::ShowDetails { id: author_id });
     }
 
     pub fn click_author_action(&mut self, action: &AuthorAction, _window: &mut Window, cx: &mut Context<Self>) {
