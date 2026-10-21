@@ -5,13 +5,14 @@ pub struct AuthorModel {
     pub name: String,
     pub last_name: String,
     pub birth_place: Option<String>,
-    pub date_of_birth: i32,
-    pub date_of_death: Option<i32>,
+    pub date_of_birth: String,
+    pub date_of_death: Option<String>,
     pub place_of_death: Option<String>,
     pub pseudonyms: Option<String>,
     pub alt_names: Option<String>,
     pub biography: String,
     pub genres: String,
+    pub langs: Option<String>,
     pub writing_lang: Option<String>,
     pub notes: Option<String>,
     pub movements_or_trends: Option<String>,
@@ -22,8 +23,8 @@ pub struct AuthorModel {
     pub inventaire_id: Option<String>,
     pub viaf_id: Option<String>,
     pub website: Option<String>,
+    pub(crate) cover_color: Option<u32>,
+    //
     pub created_at: String,
     pub updated_at: Option<String>,
-    //
-    pub(crate) cover_color: u32,
 }
