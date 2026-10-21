@@ -15,6 +15,9 @@ use gpui_kit::component::menu::DropdownMenu;
 //use gpui_kit::prelude::FluentBuilder;
 use crate::database::DatabaseService;
 use crate::database::authors::service::AuthorService;
+use crate::database::books::service::BookService;
+use gpui_kit::component::WindowExt;
+use gpui_kit::component::notification::NotificationType;
 use gpui_kit::rgb;
 use gpui_kit::*;
 use gpui_kit::{Context, Styled, Window};
@@ -39,6 +42,7 @@ impl Authors {
     pub fn new(window: &mut Window, cx: &mut Context<Self>, db: Arc<DatabaseService>) -> Self {
         //let author_service = AuthorService::new((*db).clone());
         let author_service = AuthorService::new(db.clone());
+        let book_service = BookService::new(db.clone());
 
         Self {
             color_config: ColorConfig::default(),
@@ -46,6 +50,7 @@ impl Authors {
             authors_list: Vec::new(),
             result_count: 0,
             author_service,
+            book_service,
         }
     }
 
@@ -307,19 +312,8 @@ impl Authors {
         (birth_place, lifespan, author.genres.clone())
     }
 
-    // TODO
-    pub fn add_fav(&mut self, author_id: i32, _cx: &mut Context<Self>) {
-        println!("add_fav author_id: {}", author_id);
-    }
-
-    pub fn show_details(&mut self, author_id: i32, cx: &mut Context<Self>) {
-        //1.
-        println!("show_details author_id: {}", author_id);
-        println!("enviando evento ShowDetails");
-        cx.emit(AuthorViewEvent::ShowDetails { id: author_id });
-    }
-
-    pub fn click_author_action(&mut self, action: &AuthorAction, _window: &mut Window, cx: &mut Context<Self>) {
+    //READY
+    pub fn click_author_action(&mut self, action: &AuthorAction, window: &mut Window, cx: &mut Context<Self>) {
         // antes, notifica el estado actual
         cx.notify();
 
@@ -328,11 +322,55 @@ impl Authors {
                 self.add_fav(action.author_id, cx);
             }
             AuthorOperation::Details => {
-                self.show_details(action.author_id, cx);
+                self.show_details(action.author_id, window, cx);
             }
         }
 
         // despues, si los métodos modifican el estado, sin notificar
         //cx.notify();
+    }
+
+    // TODO
+    pub fn add_fav(&mut self, author_id: i32, _cx: &mut Context<Self>) {
+        println!("add_fav author_id: {}", author_id);
+    }
+
+    //READY
+    /// consulta un autor por su Id, y envía el
+    /// evento `ShowDetails`, si existe el registro
+    pub fn show_details(&mut self, author_id: i32, window: &mut Window, cx: &mut Context<Self>) {
+        println!("show_details author_id: {}", author_id);
+
+        match self.author_service.get_one(author_id) {
+            //TO FIX
+            Ok(Some(author)) => match self.book_service.by_author(author_id) {
+                Ok(list) => {
+                    println!("enviando evento ShowDetails");
+                    cx.emit(AuthorViewEvent::ShowDetails {
+                        info: author,
+                        books: list,
+                    });
+                }
+                Err(error) => {
+                    let msg = format!("Ocurrió un error, al consultar libros por Id de autor: {}", error);
+                    eprintln!("{}", msg);
+
+                    window.push_notification((NotificationType::Error, msg), cx);
+                }
+            },
+            Ok(None) => {
+                let msg = format!("no se encontró el autor con ID: {}", author_id);
+                eprintln!("{}", msg);
+
+                window.push_notification((NotificationType::Warning, msg), cx);
+            }
+            Err(error) => {
+                let msg = format!("Ocurrió un error, al consultar por Id de autor: {}", error);
+                eprintln!("{}", msg);
+
+                window.push_notification((NotificationType::Error, msg), cx);
+            }
+        }
+        cx.notify();
     }
 }
