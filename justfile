@@ -63,8 +63,22 @@ c: fmt
 
 
 [group("Maintenance")]
-clean:
+[windows]
+clean-all:
+	cargo clean ; rm .\target ; rm .\Cargo.lock
+
+[group("Maintenance")]
+[unix]
+clean-all:
 	cargo clean && rm -rf ./target && rm ./Cargo.lock
+
+[windows]
+show-b:
+	more .\target\build_version.conf
+
+[unix]
+show-b:
+	cat .\target\build_version.conf
 
 [group("Maintenance")]
 [doc('Git check repo')]
@@ -72,3 +86,18 @@ gitc:
 	git fsck
 	git gc --prune=now --aggressive
 	git count-objects -vH
+
+db-rm:
+	rm $env:LOCALAPPDATA\Thekes\data\thekes.db
+
+bundle-v:
+	cg-bundler --minify --keep-docs --no-expand-modules --validate
+
+bundle-g:
+	cg-bundler --keep-docs --no-expand-modules -o bundle.rs
+
+bundle-m:
+	cg-bundler --minify --keep-docs --no-expand-modules -o bundle-m.rs
+
+bundle-rm:
+	rm .\bundle.rs ; rm .\bundle-m.rs
