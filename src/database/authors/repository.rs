@@ -1,24 +1,31 @@
-use rusqlite::Error;
-use rusqlite::{Connection, Result, params};
-
 use super::model::AuthorModel;
+use rusqlite::Error;
+use rusqlite::{Connection, OptionalExtension, Result, params};
 
 pub fn all_authors(conn: &Connection) -> Result<Vec<AuthorModel>, Error> {
-    let mut stmt = conn.prepare("SELECT id, name, last_name FROM authors")?;
+    let mut stmt = conn.prepare(
+        "SELECT id, name, last_name, birth_place, date_of_birth, date_of_death, genres, biography, cover_color FROM authors",
+    )?;
 
     let authors_list = stmt.query_map([], |row| {
         Ok(AuthorModel {
             id: row.get(0)?,
             name: row.get(1)?,
             last_name: row.get(2)?,
+            birth_place: row.get(3)?,
+            date_of_birth: row.get(4)?,
+            date_of_death: row.get(5)?,
+            genres: row.get(6)?,
+            biography: row.get(7)?,
+            cover_color: row.get(8)?,
             ..Default::default()
         })
     })?;
 
     let mut result: Vec<AuthorModel> = Vec::new();
 
-    for movie in authors_list {
-        result.push(movie.unwrap());
+    for author in authors_list {
+        result.push(author.unwrap());
     }
 
     Ok(result)
@@ -30,6 +37,34 @@ pub fn delete_author(conn: &Connection, id: i32) -> Result<usize> {
     let mut stmt = conn.prepare("DELETE FROM authors WHERE id = :id")?;
     let last_id = stmt.execute(&[(":id", &id)])?;
     Ok(last_id)
+}
+
+pub fn search_author_by_id(conn: &Connection, item_id: i32) -> Result<Option<AuthorModel>> {
+    conn.query_row(
+        "SELECT id, name, last_name, birth_place, date_of_birth,
+                date_of_death, genres, biography, langs, cover_color,open_library_id, viaf_id
+         FROM authors
+         WHERE id = ?1",
+        params![item_id],
+        |row| {
+            Ok(AuthorModel {
+                id: row.get("id")?,
+                name: row.get("name")?,
+                last_name: row.get("last_name")?,
+                birth_place: row.get("birth_place")?,
+                date_of_birth: row.get("date_of_birth")?,
+                date_of_death: row.get("date_of_death")?,
+                genres: row.get("genres")?,
+                biography: row.get("biography")?,
+                cover_color: row.get("cover_color")?,
+                langs: row.get("langs")?,
+                open_library_id: row.get("open_library_id")?,
+                viaf_id: row.get("viaf_id")?,
+                ..Default::default()
+            })
+        },
+    )
+    .optional()
 }
 
 #[allow(dead_code)]
