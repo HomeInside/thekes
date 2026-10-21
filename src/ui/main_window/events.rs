@@ -47,6 +47,11 @@ impl MainWindow {
             AuthorViewEvent::ShowDetails => {
                 self.show_author_form = false;
                 self.show_author_details = true;
+                println!("handle_subs ShowDetails");
+                self.author_details.update(cx, |author_detail, cx| {
+                    let item_id: i32 = 1;
+                    author_detail.load_author_details(item_id, cx);
+                });
             }
         }
         cx.notify();

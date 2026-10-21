@@ -178,7 +178,7 @@ impl MainWindow {
         // TODO puede ir en cada modulo y evitar que MainWindow gestione todo
         let authors = cx.new(|cx| Authors::new(window, cx, db_conn.clone()));
         let author_form = cx.new(|cx| AuthorFormView::new(window, cx));
-        let author_details = cx.new(|cx| AuthorDetailsView::new(window, cx));
+        let author_details = cx.new(|cx| AuthorDetailsView::new(window, cx, db_conn.clone()));
 
         // manejar eventos de módulo autores
         let subs_author_view = Self::subscribe_author_events(&authors, window, cx, "authors_list");
