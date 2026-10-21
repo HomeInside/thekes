@@ -1,6 +1,8 @@
-use crate::database::authors::AuthorsItem;
+//use crate::database::authors::AuthorsItem;
 use crate::ui::main_window::ColorConfig;
 //use gpui_kit::AppContext;
+use crate::database::authors::model::AuthorModel;
+use crate::database::authors::service::AuthorService;
 use gpui_kit::IntoElement;
 use gpui_kit::assets::IconName as AssetIconName;
 use gpui_kit::component::ActiveTheme;
@@ -23,8 +25,9 @@ pub enum AuthorViewEvent {
 pub struct Authors {
     pub(crate) color_config: ColorConfig,
     pub(crate) input_search: Entity<InputState>,
-    pub(crate) all_authors: Vec<AuthorsItem>,
+    pub(crate) authors_list: Vec<AuthorModel>,
     pub(crate) result_count: usize,
+    pub(crate) author_service: AuthorService,
 }
 
 impl EventEmitter<AuthorViewEvent> for Authors {}

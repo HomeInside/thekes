@@ -326,7 +326,14 @@ impl Render for AuthorFormView {
                                 cx.emit(AuthorViewEvent::ShowList);
                             })),
                     )
-                    .child(Button::new("author-form-save").primary().label("Crear")),
+                    .child(
+                        Button::new("btn-author-form-save")
+                            .primary()
+                            .label("Crear")
+                            .on_click(cx.listener(|_this, _, _, cx| {
+                                println!("btn-author-form-save fn");
+                            })),
+                    ),
             )
     }
 }
