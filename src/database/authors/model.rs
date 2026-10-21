@@ -1,4 +1,5 @@
 #[derive(Clone, Debug, Default)]
+#[allow(dead_code)]
 pub struct AuthorModel {
     pub id: i32,
     pub name: String,
