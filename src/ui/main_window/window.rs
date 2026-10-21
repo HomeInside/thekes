@@ -1,7 +1,6 @@
 use super::ColorConfig;
 use super::subcriptions::{ActiveModule, NavigateTo};
 use crate::database::DatabaseService;
-use crate::database::authors::service::AuthorService;
 use crate::ui::authors::{AuthorDetailsView, AuthorFormView, Authors};
 use crate::ui::books::Books;
 use crate::ui::dashboard::Dashboard;
@@ -16,8 +15,7 @@ use gpui_kit::component::h_flex;
 use gpui_kit::component::{Icon, IconName};
 use gpui_kit::*;
 use gpui_kit::{Context, Render, Styled, Window};
-use rusqlite::Connection;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 pub struct MainWindow {
     pub(crate) loading: bool,
@@ -174,7 +172,7 @@ impl MainWindow {
     pub fn new(window: &mut Window, cx: &mut Context<Self>, db_conn: Arc<DatabaseService>) -> Self {
         let sidebar = cx.new(|_| AppSidebar::new());
         let dashboard = cx.new(|_| Dashboard::new());
-        let books = cx.new(|cx| Books::new(window, cx));
+        let books = cx.new(|cx| Books::new(window, cx, db_conn.clone()));
 
         // manejar instancia del módulo de autores
         // TODO puede ir en cada modulo y evitar que MainWindow gestione todo
@@ -190,11 +188,15 @@ impl MainWindow {
         // manejar eventos de la sidebar
         let subs_sidebar = cx.subscribe(&sidebar, |this, _sidebar, event: &NavigateTo, cx| {
             println!("llegó desde NavigateTo: {:?}", event.module);
-            // TO FIX validar esta parte
+            // TO FIX validar y mejorar esta parte
             // cargar los datos de autor
             if event.module == ActiveModule::Authors {
                 this.authors.update(cx, |authors, cx| {
                     authors.load_authors(cx);
+                });
+            } else if event.module == ActiveModule::Books {
+                this.books.update(cx, |authors, cx| {
+                    authors.load_books(cx);
                 });
             }
             //

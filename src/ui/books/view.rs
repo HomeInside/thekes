@@ -1,5 +1,7 @@
 use super::{BookAction, BookOperation};
-use crate::database::books::{BOOKS_LIST, BookItem};
+use crate::database::DatabaseService;
+use crate::database::books::model::BooksModel;
+use crate::database::books::service::BookService;
 use crate::ui::main_window::ColorConfig;
 use gpui_kit::IntoElement;
 use gpui_kit::assets::IconName as AssetIconName;
@@ -14,14 +16,16 @@ use gpui_kit::component::{Icon, IconName};
 use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::*;
 use gpui_kit::{Context, Entity, Render, Styled, Window};
+use std::sync::Arc;
 
 pub struct Books {
     color_config: ColorConfig,
     pub input_search: Entity<InputState>,
     //pub hovered_book: Option<&'static str>,
     //focus_handle: FocusHandle,
-    pub(crate) all_books: Vec<BookItem>,
+    pub(crate) book_list: Vec<BooksModel>,
     pub(crate) result_count: usize,
+    pub(crate) book_service: BookService,
 }
 
 impl Render for Books {
@@ -125,21 +129,23 @@ impl Render for Books {
 
 // métodos
 impl Books {
-    pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+    pub fn new(window: &mut Window, cx: &mut Context<Self>, db: Arc<DatabaseService>) -> Self {
+        let book_service = BookService::new(db.clone());
         Self {
             color_config: ColorConfig::default(),
             input_search: cx.new(|cx| InputState::new(window, cx).placeholder("Buscar por título o autor...")),
             //hovered_book: None,
             //focus_handle: cx.focus_handle(),
-            all_books: Self::find_books(""),
-            result_count: BOOKS_LIST.len(),
+            book_list: Vec::new(),
+            result_count: 0,
+            book_service,
         }
     }
 
-    pub fn find_books(query: &str) -> Vec<BookItem> {
+    pub fn find_books(&self, query: &str) -> Vec<BooksModel> {
         let query = query.trim().to_lowercase();
 
-        BOOKS_LIST
+        self.book_list
             .iter()
             .filter(|book| query.is_empty() || book.title.to_lowercase().contains(&query))
             .cloned()
@@ -153,13 +159,14 @@ impl Books {
             .flex_wrap()
             .items_start()
             .gap_4()
-            .children(self.all_books.iter().map(|book| self.book_card(book)))
+            .children(self.book_list.iter().map(|book| self.book_card(book)))
     }
 
-    fn book_card(&self, book: &BookItem) -> impl IntoElement {
+    fn book_card(&self, book: &BooksModel) -> impl IntoElement {
         let book_id = book.id;
-        let _book_title = book.title;
+        let _book_title = book.title.clone();
         let button_id = format!("book-menu-{}", book.id);
+        let buy = book.buy.clone();
 
         div()
             .id(format!("book-card-{}", book.title))
@@ -194,7 +201,7 @@ impl Books {
                             .font_weight(FontWeight::BOLD)
                             .line_clamp(3)
                             .text_ellipsis()
-                            .child(book.title),
+                            .child(book.title.clone()),
                     ),
             )
             // Información
@@ -209,7 +216,9 @@ impl Books {
                                 .text_color(rgb(0x777777))
                                 .line_clamp(2)
                                 .text_ellipsis()
-                                .child(book.author)
+                                //TO FIX es autor_id
+                                //.child(book.author)
+                                .child(book.synopsis.clone())
                                 .child(div().text_xs().text_color(rgb(0x777777)).child("1900")),
                         ),
                     )
@@ -221,11 +230,15 @@ impl Books {
                             .tooltip("Más opciones")
                             .dropdown_menu({
                                 move |menu, _window, _cx| {
+                                    let buy = buy
+                                        .clone()
+                                        .unwrap_or_else(|| "https://www.amazon.com/amz-books/store".to_string());
+
                                     menu.menu_with_icon(
                                         "Favorito",
                                         IconName::Heart,
                                         Box::new(BookAction {
-                                            book_id,
+                                            book_id: book_id as u64,
                                             book_op: BookOperation::Favorite,
                                         }),
                                     )
@@ -233,7 +246,7 @@ impl Books {
                                         "Estoy leyendo",
                                         AssetIconName::BookOpenCheck,
                                         Box::new(BookAction {
-                                            book_id,
+                                            book_id: book_id as u64,
                                             book_op: BookOperation::Reading,
                                         }),
                                     )
@@ -241,7 +254,7 @@ impl Books {
                                         "Quiero leer",
                                         AssetIconName::ListTodo,
                                         Box::new(BookAction {
-                                            book_id,
+                                            book_id: book_id as u64,
                                             book_op: BookOperation::WantToRead,
                                         }),
                                     )
@@ -249,7 +262,7 @@ impl Books {
                                         "Finalizado",
                                         AssetIconName::CircleCheckBig,
                                         Box::new(BookAction {
-                                            book_id,
+                                            book_id: book_id as u64,
                                             book_op: BookOperation::Finished,
                                         }),
                                     )
@@ -258,12 +271,12 @@ impl Books {
                                         "Detalles",
                                         AssetIconName::BookText,
                                         Box::new(BookAction {
-                                            book_id,
+                                            book_id: book_id as u64,
                                             book_op: BookOperation::Details,
                                         }),
                                     )
                                     .separator()
-                                    .link("Comprar en línea", "https://www.amazon.com/amz-books/store")
+                                    .link("Comprar en línea", buy)
                                 }
                             }),
                     ),
