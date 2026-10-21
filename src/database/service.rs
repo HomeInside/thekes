@@ -1,7 +1,4 @@
-use super::authors::model::AuthorModel;
-use super::authors::repository;
 use rusqlite::Connection;
-use std::error::Error;
 use std::sync::{Arc, Mutex};
 
 #[derive(Clone)]
