@@ -92,9 +92,11 @@ impl Render for Authors {
                     .grid()
                     .gap_3()
                     .when(compact, |this| this.grid_cols(1))
-                    .child(self.authors_dashboard("Autores", self.result_count.to_string(), rgb(0xC6D2B9)))
-                    .child(self.authors_dashboard("Obras", "—".to_string(), rgb(0xC3CBE0)))
-                    .child(self.authors_dashboard("Sin biografía", "—".to_string(), rgb(0xD6B5A3))),
+                    .child(self.authors_dashboard("Autores", self.result_count.to_string(), rgb(0xC6D2B9))),
+                //
+                //TO FIX agregar mas info para las card
+                //.child(self.authors_dashboard("Obras", "—".to_string(), rgb(0xC3CBE0)))
+                //.child(self.authors_dashboard("Sin biografía", "—".to_string(), rgb(0xD6B5A3))),
             )
             //
             // botón nuevo
