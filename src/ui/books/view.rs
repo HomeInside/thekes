@@ -275,8 +275,16 @@ impl Books {
                                             book_op: BookOperation::Details,
                                         }),
                                     )
-                                    .separator()
                                     .link("Comprar en línea", buy)
+                                    .separator()
+                                    .menu_with_icon(
+                                        "Eliminar",
+                                        AssetIconName::Trash,
+                                        Box::new(BookAction {
+                                            book_id: book_id as u64,
+                                            book_op: BookOperation::Delete,
+                                        }),
+                                    )
                                 }
                             }),
                     ),
