@@ -22,6 +22,7 @@ check: fmt
 
 [group("Dev")]
 clippy: fmt
+	#cargo clippy --all-targets --all-features -- -D warnings
 	cargo clippy --no-deps
 
 [group("Dev")]
@@ -101,3 +102,12 @@ bundle-m:
 
 bundle-rm:
 	rm .\bundle.rs ; rm .\bundle-m.rs
+
+find-a:
+    rg -n --glob '*.rs' '#\s*\[\s*allow\s*\(' .
+
+find-t:
+    clear && rg -n --glob '*.rs' 'TODO|FIX|TO FIX|CHECK|TO CHECK|TEST|TO TEST|REMOVE|TO REMOVE|FIXME|HACK|todo!\(|unimplemented!\(|unreachable!\(' .
+
+find-c:
+    rg -n --glob '*.rs' '#\s*\[\s*allow\s*\(\s*clippy::' .
