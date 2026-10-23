@@ -16,6 +16,7 @@ use gpui_kit::component::menu::DropdownMenu;
 use crate::database::DatabaseService;
 use crate::database::authors::service::AuthorService;
 use crate::database::books::service::BookService;
+use crate::ui::dialogs;
 use gpui_kit::component::WindowExt;
 use gpui_kit::component::notification::NotificationType;
 use gpui_kit::rgb;
@@ -27,6 +28,7 @@ use std::sync::Arc;
 pub enum AuthorOperation {
     Favorite,
     Details,
+    Delete,
 }
 
 #[derive(Action, Clone, PartialEq)]
@@ -221,13 +223,21 @@ impl Authors {
                                     author_op: AuthorOperation::Favorite,
                                 }),
                             )
-                            .separator()
                             .menu_with_icon(
                                 "Detalles",
-                                AssetIconName::BookText,
+                                AssetIconName::Users,
                                 Box::new(AuthorAction {
                                     author_id,
                                     author_op: AuthorOperation::Details,
+                                }),
+                            )
+                            .separator()
+                            .menu_with_icon(
+                                "Eliminar",
+                                AssetIconName::Trash,
+                                Box::new(AuthorAction {
+                                    author_id,
+                                    author_op: AuthorOperation::Delete,
                                 }),
                             )
                         }
@@ -324,6 +334,9 @@ impl Authors {
             AuthorOperation::Details => {
                 self.show_details(action.author_id, window, cx);
             }
+            AuthorOperation::Delete => {
+                self.delete_item(action.author_id, window, cx);
+            }
         }
 
         // despues, si los métodos modifican el estado, sin notificar
@@ -373,4 +386,32 @@ impl Authors {
         }
         cx.notify();
     }
+
+    pub fn delete_item(&mut self, author_id: i32, window: &mut Window, cx: &mut Context<Self>) {
+        println!("delete_item author_id: {}", author_id);
+
+        dialogs::confirm(
+            "Delete Author",
+            "Are you sure you want to delete this author?",
+            window,
+            cx,
+            move |author, window, cx| {
+                println!("eliminando autor...");
+
+                // TO CHECK
+                match author.author_service.remove_author(author_id as i32) {
+                    Ok(result) => {
+                        window.push_notification((NotificationType::Success, "Author deleted"), cx);
+                        author.load_authors(cx);
+                    }
+                    Err(error) => {
+                        let msg = format!("Ocurrió un error, al eliminar el autor: {}", error);
+                        eprintln!("{}", msg);
+                        window.push_notification((NotificationType::Error, msg), cx);
+                    }
+                };
+                cx.notify();
+            },
+        );
+    } //delete_item
 }

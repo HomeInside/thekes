@@ -85,10 +85,7 @@ impl Books {
     }
 
     pub fn delete_item(&mut self, book_id: u64, window: &mut Window, cx: &mut Context<Self>) {
-        println!("delete_item fn");
         println!("delete_item book_id: {}", book_id);
-        //let _icon_color = cx.theme().warning;
-        //let _weak_self = cx.entity().downgrade();
 
         dialogs::confirm(
             "Delete Book",
