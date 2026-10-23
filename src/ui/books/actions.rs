@@ -1,7 +1,9 @@
 use super::Books;
-use crate::database::books::model::BooksModel;
-use crate::database::books::service::BookService;
+use crate::ui::dialogs;
+//use crate::ui::dialogs::ConfirmDialog;
 use gpui_kit::Action;
+use gpui_kit::component::WindowExt;
+use gpui_kit::component::notification::NotificationType;
 use gpui_kit::{Context, Window};
 
 #[derive(Clone, PartialEq)]
@@ -11,6 +13,7 @@ pub enum BookOperation {
     WantToRead,
     Finished,
     Details,
+    Delete,
 }
 
 #[derive(Action, Clone, PartialEq)]
@@ -75,12 +78,44 @@ impl Books {
         println!("set_finished fn");
         println!("set_finished book_id: {}", book_id);
     }
+
     pub fn show_details(&mut self, book_id: u64, _cx: &mut Context<Self>) {
         println!("show_details fn");
         println!("show_details book_id: {}", book_id);
     }
 
-    pub fn click_book_action(&mut self, action: &BookAction, _window: &mut Window, cx: &mut Context<Self>) {
+    pub fn delete_item(&mut self, book_id: u64, window: &mut Window, cx: &mut Context<Self>) {
+        println!("delete_item fn");
+        println!("delete_item book_id: {}", book_id);
+        //let _icon_color = cx.theme().warning;
+        //let _weak_self = cx.entity().downgrade();
+
+        dialogs::confirm(
+            "Delete Book",
+            "Are you sure you want to delete this book?",
+            window,
+            cx,
+            move |books, window, cx| {
+                println!("eliminando libro...");
+
+                // TO CHECK
+                match books.book_service.remove_book(book_id as i32) {
+                    Ok(result) => {
+                        window.push_notification((NotificationType::Success, "Book deleted"), cx);
+                        books.load_books(cx);
+                    }
+                    Err(error) => {
+                        let msg = format!("Ocurrió un error, al eliminar el libro: {}", error);
+                        eprintln!("{}", msg);
+                        window.push_notification((NotificationType::Error, msg), cx);
+                    }
+                };
+                cx.notify();
+            },
+        );
+    } //delete_item
+
+    pub fn click_book_action(&mut self, action: &BookAction, window: &mut Window, cx: &mut Context<Self>) {
         // antes, notifica el estado actual
         cx.notify();
 
@@ -99,6 +134,9 @@ impl Books {
             }
             BookOperation::Details => {
                 self.show_details(action.book_id, cx);
+            }
+            BookOperation::Delete => {
+                self.delete_item(action.book_id, window, cx);
             }
         }
 
