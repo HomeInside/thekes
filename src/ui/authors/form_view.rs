@@ -177,7 +177,7 @@ impl Render for AuthorFormView {
                             .ghost()
                             .label("Volver")
                             .on_click(cx.listener(|_this, _, _, cx| {
-                                cx.emit(AuthorViewEvent::ShowList);
+                                cx.emit(AuthorViewEvent::List);
                             })),
                     ),
             )
@@ -323,7 +323,7 @@ impl Render for AuthorFormView {
                             .secondary()
                             .label("Cancelar")
                             .on_click(cx.listener(|_this, _, _, cx| {
-                                cx.emit(AuthorViewEvent::ShowList);
+                                cx.emit(AuthorViewEvent::List);
                             })),
                     )
                     .child(

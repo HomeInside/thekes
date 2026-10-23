@@ -63,15 +63,15 @@ impl AuthorDetailsView {
     }
 
     // TODO
-    pub fn make_books_data(&mut self, books: &Vec<BooksModel>, _cx: &mut Context<Self>) {
+    pub fn make_books_data(&mut self, books: &[BooksModel], _cx: &mut Context<Self>) {
         println!("make_books_data fn");
-        if books.len() > 0 {
+        if !books.is_empty() {
             self.books = books.to_vec();
         }
     }
 
     pub fn render_books(&self) -> impl IntoElement {
-        if self.books.len() > 0 {
+        if !self.books.is_empty() {
             v_flex()
                 .gap_2()
                 .child(div().text_sm().font_weight(FontWeight::SEMIBOLD).child("Otras obras"))
@@ -276,6 +276,8 @@ impl AuthorDetailsView {
             )
     }
 
+    // TO FIX revisar si se usa
+    #[allow(dead_code)]
     fn featured_book(
         title: &'static str,
         year: &'static str,
@@ -371,7 +373,7 @@ impl Render for AuthorDetailsView {
                             .ghost()
                             .label("Volver")
                             .on_click(cx.listener(|_this, _, _, cx| {
-                                cx.emit(AuthorViewEvent::ShowList);
+                                cx.emit(AuthorViewEvent::List);
                             })),
                     ),
             )

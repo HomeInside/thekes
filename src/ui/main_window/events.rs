@@ -40,11 +40,11 @@ impl MainWindow {
                 self.show_author_form = true;
                 self.show_author_details = false;
             }
-            AuthorViewEvent::ShowList => {
+            AuthorViewEvent::List => {
                 self.show_author_form = false;
                 self.show_author_details = false;
             }
-            AuthorViewEvent::ShowDetails { info, books } => {
+            AuthorViewEvent::Details { info, books } => {
                 self.show_author_form = false;
                 self.show_author_details = true;
                 //2.

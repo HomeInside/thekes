@@ -155,25 +155,6 @@ impl Render for AppSidebar {
                         ),
                 ),
             )
-            /*
-            //TO TEST
-            // iconos
-            .child(
-                SidebarGroup::new("Iconos").child(
-                    SidebarMenu::new()
-                        .child(SidebarMenuItem::new("Colecciones").icon(AssetIconName::Book))
-                        .child(SidebarMenuItem::new("BookHeart").icon(AssetIconName::BookHeart))
-                        .child(SidebarMenuItem::new("BookOpenCheck").icon(AssetIconName::BookOpenCheck))
-                        .child(SidebarMenuItem::new("ListTodo").icon(AssetIconName::ListTodo))
-                        .child(SidebarMenuItem::new("SquareLibrary").icon(AssetIconName::SquareLibrary))
-                        .child(SidebarMenuItem::new("TimerReset").icon(AssetIconName::TimerReset))
-                        .child(SidebarMenuItem::new("Accessibility").icon(AssetIconName::Accessibility))
-                        .child(SidebarMenuItem::new("AlarmClock").icon(AssetIconName::AlarmClock))
-                        .child(SidebarMenuItem::new("Folder").icon(IconName::Folder))
-                        .child(SidebarMenuItem::new("Inbox").icon(IconName::Inbox)),
-                ),
-            )
-            */
             //
             // FOOTER
             .footer(

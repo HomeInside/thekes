@@ -26,6 +26,7 @@ impl MainWindow {
     }
 
     // TO REMOVE
+    // TODO falta implementar el módulo de anotaciones
     pub fn load_notes(&mut self, _cx: &mut Context<Self>) -> impl IntoElement {
         div().child("Anotaciones")
     }

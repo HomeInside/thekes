@@ -156,12 +156,12 @@ impl Authors {
         println!("show_details author_id: {}", author_id);
 
         match self.author_service.get_one(author_id) {
-            //TO FIX
+            //TO CHECK
             Ok(Some(author)) => match self.book_service.by_author(author_id) {
                 Ok(list) => {
                     println!("enviando evento ShowDetails");
-                    cx.emit(AuthorViewEvent::ShowDetails {
-                        info: author,
+                    cx.emit(AuthorViewEvent::Details {
+                        info: Box::new(author),
                         books: list,
                     });
                 }
@@ -201,7 +201,7 @@ impl Authors {
                 println!("eliminando autor...");
 
                 // TO CHECK
-                match author.author_service.remove_author(author_id as i32) {
+                match author.author_service.remove_author(author_id) {
                     Ok(_result) => {
                         window.push_notification((NotificationType::Success, "Author deleted"), cx);
                         author.load_authors(cx);

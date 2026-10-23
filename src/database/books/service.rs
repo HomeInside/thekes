@@ -41,6 +41,7 @@ impl BookService {
         repository::all_books_by_author(&conn, item_id)
     }
 
+    #[allow(dead_code)]
     pub fn create_book(&self, author: &BooksModel) -> Result<usize> {
         let conn = self.db.get_conn().lock().map_err(|_| rusqlite::Error::InvalidQuery)?;
 

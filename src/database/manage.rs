@@ -73,8 +73,7 @@ pub fn init_db(conn: &Connection) -> Result<(), Box<dyn Error>> {
     conn.execute_batch("COMMIT")?;
 
     // crear data inicial de ejemplo
-    let res = add_default_author(conn)?;
-    println!("add_default_author result {:?}", res);
+    add_default_author(conn)?;
 
     Ok(())
 }

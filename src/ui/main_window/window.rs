@@ -18,6 +18,7 @@ use gpui_kit::{Context, Render, Styled, Window};
 use std::sync::Arc;
 
 pub struct MainWindow {
+    #[allow(dead_code)]
     pub(crate) loading: bool,
     pub(crate) toggle_theme: bool,
     sidebar: Entity<AppSidebar>,
@@ -36,6 +37,7 @@ pub struct MainWindow {
     //
     //_sidebar_subscription: Subscription,
     pub(super) _subscriptions: Vec<Subscription>,
+    #[allow(dead_code)]
     db_conn: Arc<DatabaseService>,
 }
 
@@ -174,8 +176,8 @@ impl MainWindow {
         let dashboard = cx.new(|_| Dashboard::new());
         let books = cx.new(|cx| Books::new(window, cx, db_conn.clone()));
 
+        // cada modulo gestiona la conexión a la DB
         // manejar instancia del módulo de autores
-        // TODO puede ir en cada modulo y evitar que MainWindow gestione todo
         let authors = cx.new(|cx| Authors::new(window, cx, db_conn.clone()));
         let author_form = cx.new(|cx| AuthorFormView::new(window, cx));
         let author_details = cx.new(|cx| AuthorDetailsView::new(window, cx, db_conn.clone()));

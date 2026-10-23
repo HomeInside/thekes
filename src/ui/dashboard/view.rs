@@ -153,6 +153,7 @@ impl Dashboard {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn sidebar_card(
         &self,
         icon: &'static str,

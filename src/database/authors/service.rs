@@ -43,6 +43,7 @@ impl AuthorService {
         repository::search_author_by_id(&conn, item_id)
     }
 
+    #[allow(dead_code)]
     pub fn create_author(&self, author: &AuthorModel) -> Result<usize> {
         let conn = self.db.get_conn().lock().map_err(|_| rusqlite::Error::InvalidQuery)?;
 
