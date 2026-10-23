@@ -23,8 +23,11 @@ use gpui_kit::{Context, Entity, Render, Styled, Window};
 #[derive(Debug, Clone)]
 pub enum AuthorViewEvent {
     ShowForm,
-    ShowList,
-    ShowDetails { info: AuthorModel, books: Vec<BooksModel> },
+    List,
+    Details {
+        info: Box<AuthorModel>,
+        books: Vec<BooksModel>,
+    },
 }
 
 pub struct Authors {
@@ -54,7 +57,7 @@ impl Authors {
         let full_name = format!("{} {}", author.name, author.last_name);
         let initials = Self::gen_monogram(author);
 
-        let cover_color = author.cover_color.clone().unwrap_or_else(|| 0xF4D5C2);
+        let cover_color = author.cover_color.unwrap_or(0xF4D5C2);
         let accent = rgb(cover_color);
 
         div()
