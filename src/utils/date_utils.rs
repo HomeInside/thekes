@@ -1,4 +1,4 @@
-use astrolabe::{DateTime, DateUtilities};
+use astrolabe::DateTime;
 
 pub fn date_to_local_string(in_date: String, lang: &str) -> String {
     let the_date = DateTime::parse(in_date.as_str(), "yyyy-MM-dd").unwrap();

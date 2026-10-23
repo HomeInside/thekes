@@ -63,7 +63,7 @@ impl AuthorDetailsView {
     }
 
     // TODO
-    pub fn make_books_data(&mut self, books: &Vec<BooksModel>, cx: &mut Context<Self>) {
+    pub fn make_books_data(&mut self, books: &Vec<BooksModel>, _cx: &mut Context<Self>) {
         println!("make_books_data fn");
         if books.len() > 0 {
             self.books = books.to_vec();
@@ -97,7 +97,7 @@ impl AuthorDetailsView {
 
     ///usa los datos de `AuthorModel` y los
     /// organiza para mostrarlos en la ui
-    pub fn make_author_data(&mut self, author: &AuthorModel, cx: &mut Context<Self>) {
+    pub fn make_author_data(&mut self, author: &AuthorModel, _cx: &mut Context<Self>) {
         self.author_detail.id = author.id;
         self.author_detail.name = author.name.clone();
         self.author_detail.last_name = author.last_name.clone();

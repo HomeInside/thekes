@@ -34,6 +34,7 @@ icon_assets!(
         MoonStar,
         BookText,
         Feather,
+        Trash,
         //
         //BookBookmark, // no existe aun
         Accessibility,
