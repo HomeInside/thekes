@@ -48,4 +48,10 @@ impl AuthorService {
 
         repository::add_author(&conn, author)
     }
+
+    pub fn remove_author(&self, item_id: i32) -> Result<usize> {
+        let conn = self.db.get_conn().lock().map_err(|_| rusqlite::Error::InvalidQuery)?;
+
+        repository::delete_author(&conn, item_id)
+    }
 }
