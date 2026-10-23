@@ -97,7 +97,7 @@ impl Books {
 
                 // TO CHECK
                 match books.book_service.remove_book(book_id as i32) {
-                    Ok(result) => {
+                    Ok(_result) => {
                         window.push_notification((NotificationType::Success, "Book deleted"), cx);
                         books.load_books(cx);
                     }

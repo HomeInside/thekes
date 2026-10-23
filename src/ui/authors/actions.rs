@@ -1,27 +1,15 @@
 use super::{AuthorViewEvent, Authors};
-use crate::database::authors::model::AuthorModel;
-use crate::ui::main_window::ColorConfig;
-use gpui_kit::Action;
-use gpui_kit::AppContext;
-use gpui_kit::IntoElement;
-use gpui_kit::Rgba;
-use gpui_kit::assets::IconName as AssetIconName;
-use gpui_kit::component::IconName;
-use gpui_kit::component::Sizable;
-use gpui_kit::component::button::{Button, ButtonVariants};
-use gpui_kit::component::h_flex;
-use gpui_kit::component::input::InputState;
-use gpui_kit::component::menu::DropdownMenu;
-//use gpui_kit::prelude::FluentBuilder;
 use crate::database::DatabaseService;
+use crate::database::authors::model::AuthorModel;
 use crate::database::authors::service::AuthorService;
 use crate::database::books::service::BookService;
 use crate::ui::dialogs;
+use crate::ui::main_window::ColorConfig;
 use gpui_kit::component::WindowExt;
+use gpui_kit::component::input::InputState;
 use gpui_kit::component::notification::NotificationType;
-use gpui_kit::rgb;
-use gpui_kit::*;
-use gpui_kit::{Context, Styled, Window};
+use gpui_kit::{Action, AppContext};
+use gpui_kit::{Context, Window};
 use std::sync::Arc;
 
 #[derive(Clone, PartialEq)]
@@ -110,15 +98,6 @@ impl Authors {
         cx.notify();
     } //click_btn_search
 
-    pub fn draw_authors(&self) -> impl IntoElement {
-        div()
-            .w_full()
-            .flex()
-            .flex_col()
-            .gap_1()
-            .children(self.authors_list.iter().map(|author| self.author_row(author)))
-    }
-
     pub fn gen_monogram(author: &AuthorModel) -> String {
         let first = author.name.chars().next().unwrap_or('?');
         let last = author.last_name.chars().next();
@@ -129,186 +108,8 @@ impl Authors {
         }
     }
 
-    pub fn author_row(&self, author: &AuthorModel) -> impl IntoElement {
-        let author_id = author.id;
-        let button_id = format!("author-menu-{}", author.id);
-        let full_name = format!("{} {}", author.name, author.last_name);
-        let initials = Self::gen_monogram(author);
-
-        let cover_color = author.cover_color.clone().unwrap_or_else(|| 0xF4D5C2);
-        let accent = rgb(cover_color);
-
-        div()
-            /*
-            .hover(|style| style.bg(rgb(0xF5F3EE)).border_color(rgb(0x00000000)))
-            */
-            .id(format!("author-row-{}", author.id))
-            .w_full()
-            .flex()
-            .items_center()
-            .gap_3()
-            .p_2()
-            .rounded_lg()
-            .border_1()
-            .cursor_pointer()
-            //.border_color(rgb(0xF5F3EE))
-            //.hover(|style| style.bg(rgb(0xF0F0E9)).border_color(rgb(0x00000000)))
-            .hover(|style| style.bg(rgb(0xF0F0E9)).border_color(rgb(0xE0E2D8)))
-            //
-            // Monograma de iniciales
-            .child(
-                div()
-                    .size(px(46.))
-                    .flex_shrink_0()
-                    .rounded_lg()
-                    .bg(accent)
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .child(
-                        div()
-                            .text_size(px(15.))
-                            .font_weight(FontWeight::BOLD)
-                            //.text_color(rgb(0x343B34))
-                            .text_color(rgb(0x655448))
-                            .child(initials),
-                    ),
-            )
-            //
-            .child({
-                let (nationality, dates, genre) = Self::author_metadata(author);
-
-                div()
-                    .flex_1()
-                    .min_w_0()
-                    .flex()
-                    .flex_col()
-                    .gap_1()
-                    // Nombre
-                    .child(
-                        div()
-                            .text_size(px(14.))
-                            .font_weight(FontWeight::SEMIBOLD)
-                            .text_color(rgb(0x34352F))
-                            .text_ellipsis()
-                            .child(full_name),
-                    )
-                    // Nacionalidad y fechas
-                    .child(
-                        h_flex()
-                            .items_center()
-                            .gap_2()
-                            .child(div().text_xs().text_color(rgb(0x82796F)).child(nationality))
-                            .child(div().size(px(3.)).rounded_full().bg(rgb(0xD6B5A3)))
-                            .child(div().text_xs().text_color(rgb(0x82796F)).child(dates)),
-                    )
-                    // Perfil literario
-                    .child(div().text_xs().text_color(rgb(0xA1846F)).child(genre))
-            })
-            //
-            // Menú de acciones
-            .child(
-                Button::new(button_id)
-                    .ghost()
-                    .small()
-                    .icon(AssetIconName::EllipsisVertical)
-                    .tooltip("Más opciones")
-                    .dropdown_menu({
-                        move |menu, _window, _cx| {
-                            menu.menu_with_icon(
-                                "Favorito",
-                                IconName::Heart,
-                                Box::new(AuthorAction {
-                                    author_id,
-                                    author_op: AuthorOperation::Favorite,
-                                }),
-                            )
-                            .menu_with_icon(
-                                "Detalles",
-                                AssetIconName::Users,
-                                Box::new(AuthorAction {
-                                    author_id,
-                                    author_op: AuthorOperation::Details,
-                                }),
-                            )
-                            .separator()
-                            .menu_with_icon(
-                                "Eliminar",
-                                AssetIconName::Trash,
-                                Box::new(AuthorAction {
-                                    author_id,
-                                    author_op: AuthorOperation::Delete,
-                                }),
-                            )
-                        }
-                    }),
-            )
-    }
-
-    // Índice alfabético
-    // TODO todavía no filtra al seleccionar una letra
-    pub fn draw_alphabet_index(&self) -> impl IntoElement {
-        let letters = [
-            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U",
-            "V", "W", "X", "Y", "Z",
-        ];
-
-        div()
-            .w_full()
-            .flex()
-            .flex_wrap()
-            .items_center()
-            .justify_center()
-            .gap_1()
-            .p_2()
-            .rounded_lg()
-            .bg(rgb(0xF5F3EE))
-            .children(letters.into_iter().map(|letter| {
-                div()
-                    .min_w(px(25.))
-                    .h(px(28.))
-                    .px_1()
-                    .rounded_md()
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .text_xs()
-                    .font_weight(FontWeight::MEDIUM)
-                    .text_color(rgb(0x65675F))
-                    .child(letter)
-            }))
-    }
-
-    // dashboard de autores
-    pub fn authors_dashboard(&self, label: &'static str, value: String, accent: Rgba) -> impl IntoElement {
-        div()
-            .flex_1()
-            .flex()
-            .flex_col()
-            .gap_1()
-            .p_3()
-            .rounded_lg()
-            .border_1()
-            .border_color(rgb(0xE3E0D8))
-            .bg(rgb(0xF5F3EE))
-            .child(div().text_xs().text_color(rgb(0x77776F)).child(label))
-            .child(
-                h_flex()
-                    .items_center()
-                    .gap_2()
-                    .child(div().size(px(8.)).rounded_full().bg(accent))
-                    .child(
-                        div()
-                            .text_size(px(22.))
-                            .font_weight(FontWeight::SEMIBOLD)
-                            .text_color(rgb(0x292B29))
-                            .child(value),
-                    ),
-            )
-    }
-
     //READY
-    fn author_metadata(author: &AuthorModel) -> (String, String, String) {
+    pub fn author_metadata(author: &AuthorModel) -> (String, String, String) {
         let birth_place = author
             .birth_place
             .clone()
@@ -387,6 +188,7 @@ impl Authors {
         cx.notify();
     }
 
+    //READY
     pub fn delete_item(&mut self, author_id: i32, window: &mut Window, cx: &mut Context<Self>) {
         println!("delete_item author_id: {}", author_id);
 
@@ -400,7 +202,7 @@ impl Authors {
 
                 // TO CHECK
                 match author.author_service.remove_author(author_id as i32) {
-                    Ok(result) => {
+                    Ok(_result) => {
                         window.push_notification((NotificationType::Success, "Author deleted"), cx);
                         author.load_authors(cx);
                     }

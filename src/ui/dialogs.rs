@@ -4,7 +4,6 @@ use gpui_kit::component::ActiveTheme;
 use gpui_kit::component::WindowExt;
 use gpui_kit::component::button::ButtonVariant;
 use gpui_kit::component::{Icon, IconName};
-use gpui_kit::*;
 use gpui_kit::{Context, Window};
 use std::{cell::RefCell, rc::Rc};
 
