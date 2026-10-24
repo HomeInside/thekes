@@ -1,11 +1,16 @@
 use super::AuthorViewEvent;
 use crate::ui::main_window::ColorConfig;
+use chrono::{Datelike, NaiveDate};
 use gpui_kit::IntoElement;
 use gpui_kit::component::Sizable;
 use gpui_kit::component::button::{Button, ButtonVariants};
 use gpui_kit::component::input::{Input, InputState, Textarea, TextareaState};
 use gpui_kit::component::scroll::ScrollableElement;
 use gpui_kit::component::{Icon, IconName, h_flex, v_flex};
+use gpui_kit::component::{
+    calendar::{self},
+    date_picker::{DatePicker, DatePickerState, DateRangePreset},
+};
 use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::*;
 use gpui_kit::{Context, Entity, Render, Styled, Window};
@@ -17,8 +22,10 @@ pub struct AuthorFormView {
     name: Entity<InputState>,
     lastname: Entity<InputState>,
     nationality: Entity<InputState>,
-    birth_date: Entity<InputState>,
-    death_date: Entity<InputState>,
+    //birth_date: Entity<InputState>,
+    birth_date: Entity<DatePickerState>,
+    //death_date: Entity<InputState>,
+    death_date: Entity<DatePickerState>,
 
     // Perfil literario
     genre: Entity<InputState>,
@@ -32,19 +39,68 @@ pub struct AuthorFormView {
     viaf_id: Entity<InputState>,
     notes: Entity<TextareaState>,
     show_additional: bool,
+    date_presets: Vec<DateRangePreset>,
 }
 
 impl EventEmitter<AuthorViewEvent> for AuthorFormView {}
 
 impl AuthorFormView {
     pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+        let current_year = chrono::Local::now().year();
+
+        let birth_date = cx.new(|cx| {
+            let min_year = 0; // año 0 d.C.
+            let max_year = current_year;
+
+            // 0000-01-01
+            let min_date = NaiveDate::from_ymd_opt(min_year, 1, 1).unwrap();
+            // current_year-12-31
+            let max_date = NaiveDate::from_ymd_opt(max_year, 12, 31).unwrap();
+
+            let mut picker = DatePickerState::new(window, cx)
+                .date_format("%Y-%m-%d")
+                .disabled_matcher(calendar::Matcher::custom(move |d| *d < min_date || *d > max_date));
+
+            picker.set_year_range((min_year, current_year + 1), cx);
+            picker
+        });
+
+        let death_date = cx.new(|cx| {
+            let min_year = 0; // año 0 d.C.
+            let max_year = current_year;
+
+            // 0000-01-01
+            let min_date = NaiveDate::from_ymd_opt(min_year, 1, 1).unwrap();
+            // current_year-12-31
+            let max_date = NaiveDate::from_ymd_opt(max_year, 12, 31).unwrap();
+
+            let mut picker = DatePickerState::new(window, cx)
+                .date_format("%Y-%m-%d")
+                .disabled_matcher(calendar::Matcher::custom(move |d| *d < min_date || *d > max_date));
+
+            picker.set_year_range((min_year, current_year + 1), cx);
+            picker
+        });
+
+        let mut presets = vec![DateRangePreset::single("Today", chrono::Local::now().date_naive())];
+
+        // se crea una lista de presets de los ultimos 5 siglos
+        // para mejorar la busqueda
+        presets.extend((1..=5).map(|century| {
+            let year = current_year - century * 100;
+            let date = NaiveDate::from_ymd_opt(year, 1, 1).unwrap();
+            let century_number = (year - 1) / 100 + 1;
+
+            DateRangePreset::single(format!("Century {century_number}"), date)
+        }));
+
         Self {
             color_config: ColorConfig::default(),
             name: cx.new(|cx| InputState::new(window, cx).placeholder("Nombre")),
             lastname: cx.new(|cx| InputState::new(window, cx).placeholder("Apellido")),
             nationality: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. Scottish")),
-            birth_date: cx.new(|cx| InputState::new(window, cx).placeholder("AAAA-MM-DD")),
-            death_date: cx.new(|cx| InputState::new(window, cx).placeholder("AAAA-MM-DD")),
+            birth_date,
+            death_date,
             genre: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. Fantasía, ciencia ficción")),
             pseudonyms: cx.new(|cx| InputState::new(window, cx).placeholder("Separa los seudónimos por comas")),
             languages: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. Español, inglés")),
@@ -62,6 +118,7 @@ impl AuthorFormView {
                     .placeholder("Notas privadas sobre el autor...")
             }),
             show_additional: false,
+            date_presets: presets,
         }
     }
 
@@ -70,6 +127,18 @@ impl AuthorFormView {
             .gap_2()
             .child(div().text_sm().font_weight(FontWeight::MEDIUM).child(label))
             .child(Input::new(input))
+    }
+
+    fn cal(&self, label: &'static str, input: &Entity<DatePickerState>) -> impl IntoElement {
+        v_flex()
+            .gap_2()
+            .child(div().text_sm().font_weight(FontWeight::MEDIUM).child(label))
+            .child(
+                DatePicker::new(input)
+                    .placeholder("Select a date...")
+                    .cleanable(true)
+                    .presets(self.date_presets.clone()),
+            )
     }
 
     fn section(
@@ -131,13 +200,13 @@ impl AuthorFormView {
                 div()
                     .flex_1()
                     .min_w_0()
-                    .child(Self::field("Fecha de nacimiento", &self.birth_date)),
+                    .child(self.cal("Fecha de nacimiento", &self.birth_date)),
             )
             .child(
                 div()
                     .flex_1()
                     .min_w_0()
-                    .child(Self::field("Fecha de fallecimiento(opcional)", &self.death_date)),
+                    .child(self.cal("Fecha de fallecimiento(opcional)", &self.death_date)),
             )
     }
 }
@@ -330,8 +399,13 @@ impl Render for AuthorFormView {
                         Button::new("btn-author-form-save")
                             .primary()
                             .label("Crear")
-                            .on_click(cx.listener(|_this, _, _, _cx| {
+                            .on_click(cx.listener(|_this, _, _window, cx| {
                                 println!("btn-author-form-save fn");
+                                // donde se pueda usar `&mut Window`
+                                /*this.birth_date.update(cx, |state, cx| {
+                                    state.set_date(NaiveDate::from_ymd_opt(1564, 4, 1).unwrap(), window, cx);
+                                });*/
+                                cx.notify();
                             })),
                     ),
             )
