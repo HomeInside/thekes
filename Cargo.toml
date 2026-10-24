@@ -19,6 +19,7 @@ gpui-kit = "=0.7.3"
 directories = "=6.0.0"
 rusqlite = { version = "=0.40.2", features = ["bundled"] }
 astrolabe = "=0.5.4"
+chrono = { version = "=0.4.45", default-features = false}
 
 [profile.dev]
 opt-level = 0
