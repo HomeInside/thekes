@@ -1,9 +1,14 @@
 use super::AuthorViewEvent;
+use crate::database::DatabaseService;
+use crate::database::authors::service::AuthorService;
 use crate::ui::main_window::ColorConfig;
 use chrono::{Datelike, NaiveDate};
+//use gpui_kit::Div;
 use gpui_kit::IntoElement;
+use gpui_kit::component::ActiveTheme;
 use gpui_kit::component::Sizable;
 use gpui_kit::component::button::{Button, ButtonVariants};
+use gpui_kit::component::form::field;
 use gpui_kit::component::input::{Input, InputState, Textarea, TextareaState};
 use gpui_kit::component::scroll::ScrollableElement;
 use gpui_kit::component::{Icon, IconName, h_flex, v_flex};
@@ -14,25 +19,34 @@ use gpui_kit::component::{
 use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::*;
 use gpui_kit::{Context, Entity, Render, Styled, Window};
+use std::sync::Arc;
+
+#[derive(Clone, Debug, Default)]
+pub struct FormAuthorErrors {
+    pub(crate) err_name: String,
+    pub(crate) err_lastname: String,
+    pub(crate) date_of_birth: String,
+    pub(crate) date_of_death: String,
+}
 
 pub struct AuthorFormView {
     pub(crate) color_config: ColorConfig,
 
     // Información personal
-    name: Entity<InputState>,
-    lastname: Entity<InputState>,
+    pub(crate) name: Entity<InputState>,
+    pub(crate) lastname: Entity<InputState>,
     nationality: Entity<InputState>,
     //birth_date: Entity<InputState>,
-    birth_date: Entity<DatePickerState>,
+    pub(crate) birth_date: Entity<DatePickerState>,
     //death_date: Entity<InputState>,
-    death_date: Entity<DatePickerState>,
+    pub(crate) death_date: Entity<DatePickerState>,
 
     // Perfil literario
-    genre: Entity<InputState>,
+    pub(crate) genre: Entity<InputState>,
     pseudonyms: Entity<InputState>,
     languages: Entity<InputState>,
     literary_movements: Entity<InputState>,
-    biography: Entity<TextareaState>,
+    pub(crate) biography: Entity<TextareaState>,
 
     // Información adicional
     openlibrary_id: Entity<InputState>,
@@ -40,12 +54,15 @@ pub struct AuthorFormView {
     notes: Entity<TextareaState>,
     show_additional: bool,
     date_presets: Vec<DateRangePreset>,
+    pub(crate) errors: FormAuthorErrors,
+    pub(crate) author_service: AuthorService,
 }
 
 impl EventEmitter<AuthorViewEvent> for AuthorFormView {}
 
 impl AuthorFormView {
-    pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
+    pub fn new(window: &mut Window, cx: &mut Context<Self>, db: Arc<DatabaseService>) -> Self {
+        let author_service = AuthorService::new(db.clone());
         let current_year = chrono::Local::now().year();
 
         let birth_date = cx.new(|cx| {
@@ -119,17 +136,19 @@ impl AuthorFormView {
             }),
             show_additional: false,
             date_presets: presets,
+            errors: Default::default(),
+            author_service,
         }
     }
 
-    fn field(label: &'static str, input: &Entity<InputState>) -> impl IntoElement {
+    fn input_field(label: &'static str, input: &Entity<InputState>) -> impl IntoElement {
         v_flex()
             .gap_2()
             .child(div().text_sm().font_weight(FontWeight::MEDIUM).child(label))
             .child(Input::new(input))
     }
 
-    fn cal(&self, label: &'static str, input: &Entity<DatePickerState>) -> impl IntoElement {
+    fn date_picker(&self, label: &'static str, input: &Entity<DatePickerState>) -> impl IntoElement {
         v_flex()
             .gap_2()
             .child(div().text_sm().font_weight(FontWeight::MEDIUM).child(label))
@@ -200,13 +219,57 @@ impl AuthorFormView {
                 div()
                     .flex_1()
                     .min_w_0()
-                    .child(self.cal("Fecha de nacimiento", &self.birth_date)),
+                    //.child(self.date_picker("Fecha de nacimiento", &self.birth_date)),
+                    .child(
+                        field()
+                            .label("Fecha de nacimiento")
+                            .required(true)
+                            .description_fn({
+                                let msg = self.errors.date_of_birth.clone();
+                                move |_, cx| {
+                                    if msg.is_empty() {
+                                        div()
+                                    } else {
+                                        div().text_color(cx.theme().danger).child(msg.clone())
+                                    }
+                                }
+                            })
+                            .child(
+                                DatePicker::new(&self.birth_date)
+                                    .placeholder("Select a date...")
+                                    .cleanable(true)
+                                    .presets(self.date_presets.clone()),
+                            ),
+                    ),
             )
+            /*
             .child(
                 div()
                     .flex_1()
                     .min_w_0()
-                    .child(self.cal("Fecha de fallecimiento(opcional)", &self.death_date)),
+                    .child(self.date_picker("Fecha de fallecimiento(opcional)", &self.death_date)),
+            )
+            */
+            .child(
+                field()
+                    .label("Fecha de fallecimiento(opcional)")
+                    .required(false)
+                    .description_fn({
+                        let msg = self.errors.date_of_death.clone();
+                        move |_, cx| {
+                            if msg.is_empty() {
+                                div()
+                            } else {
+                                div().text_color(cx.theme().danger).child(msg.clone())
+                            }
+                        }
+                    })
+                    .child(
+                        DatePicker::new(&self.death_date)
+                            .placeholder("Select a date...")
+                            .cleanable(true)
+                            .presets(self.date_presets.clone()),
+                    ),
             )
     }
 }
@@ -272,10 +335,53 @@ impl Render for AuthorFormView {
                                 h_flex()
                                     .w_full()
                                     .gap_4()
-                                    .child(div().flex_1().min_w_0().child(Self::field("Nombre", &self.name)))
-                                    .child(div().flex_1().min_w_0().child(Self::field("Apellidos", &self.lastname))),
+                                    //
+                                    // TODO
+                                    //.child(div().flex_1().min_w_0().child(Self::input_field("Nombre", &self.name)))
+                                    .child(
+                                        field()
+                                            .label("Nombre")
+                                            .required(true)
+                                            .description_fn({
+                                                let msg = self.errors.err_name.clone();
+                                                move |_, cx| {
+                                                    if msg.is_empty() {
+                                                        div()
+                                                    } else {
+                                                        div().text_color(cx.theme().danger).child(msg.clone())
+                                                    }
+                                                }
+                                            })
+                                            .child(Input::new(&self.name)),
+                                    )
+                                    //
+                                    // TODO
+                                    /*
+                                    .child(
+                                        div()
+                                            .flex_1()
+                                            .min_w_0()
+                                            .child(Self::input_field("Apellidos", &self.lastname)),
+                                    ),
+                                    */
+                                    .child(
+                                        field()
+                                            .label("Apellidos")
+                                            .required(true)
+                                            .description_fn({
+                                                let msg = self.errors.err_lastname.clone();
+                                                move |_, cx| {
+                                                    if msg.is_empty() {
+                                                        div()
+                                                    } else {
+                                                        div().text_color(cx.theme().danger).child(msg.clone())
+                                                    }
+                                                }
+                                            })
+                                            .child(Input::new(&self.lastname)),
+                                    ), //
                             )
-                            .child(Self::field("Nacionalidad", &self.nationality))
+                            .child(Self::input_field("Nacionalidad", &self.nationality))
                             .child(self.date_row()),
                     ))
                     //
@@ -287,14 +393,14 @@ impl Render for AuthorFormView {
                         div(),
                         v_flex()
                             .gap_4()
-                            .child(Self::field("Géneros literarios", &self.genre))
+                            .child(Self::input_field("Géneros literarios", &self.genre))
                             .child(
                                 div()
                                     .text_xs()
                                     .text_color(rgb(0x85837D))
                                     .child("Puedes introducir varios valores separados por comas"),
                             )
-                            .child(Self::field("Seudónimo(s)", &self.pseudonyms))
+                            .child(Self::input_field("Seudónimo(s)", &self.pseudonyms))
                             .child(
                                 h_flex()
                                     .w_full()
@@ -303,14 +409,12 @@ impl Render for AuthorFormView {
                                         div()
                                             .flex_1()
                                             .min_w_0()
-                                            .child(Self::field("Idiomas de escritura", &self.languages)),
+                                            .child(Self::input_field("Idiomas de escritura", &self.languages)),
                                     )
-                                    .child(
-                                        div()
-                                            .flex_1()
-                                            .min_w_0()
-                                            .child(Self::field("Movimientos o corrientes", &self.literary_movements)),
-                                    ),
+                                    .child(div().flex_1().min_w_0().child(Self::input_field(
+                                        "Movimientos o corrientes",
+                                        &self.literary_movements,
+                                    ))),
                             )
                             .child(
                                 v_flex()
@@ -356,9 +460,14 @@ impl Render for AuthorFormView {
                                             div()
                                                 .flex_1()
                                                 .min_w_0()
-                                                .child(Self::field("Open Library ID", &self.openlibrary_id)),
+                                                .child(Self::input_field("Open Library ID", &self.openlibrary_id)),
                                         )
-                                        .child(div().flex_1().min_w_0().child(Self::field("VIAF ID", &self.viaf_id))),
+                                        .child(
+                                            div()
+                                                .flex_1()
+                                                .min_w_0()
+                                                .child(Self::input_field("VIAF ID", &self.viaf_id)),
+                                        ),
                                 )
                                 .child(
                                     v_flex()
@@ -399,14 +508,7 @@ impl Render for AuthorFormView {
                         Button::new("btn-author-form-save")
                             .primary()
                             .label("Crear")
-                            .on_click(cx.listener(|_this, _, _window, cx| {
-                                println!("btn-author-form-save fn");
-                                // donde se pueda usar `&mut Window`
-                                /*this.birth_date.update(cx, |state, cx| {
-                                    state.set_date(NaiveDate::from_ymd_opt(1564, 4, 1).unwrap(), window, cx);
-                                });*/
-                                cx.notify();
-                            })),
+                            .on_click(cx.listener(|this, _, window, cx| this.click_btn_form_save(window, cx))),
                     ),
             )
     }
