@@ -1,6 +1,6 @@
 [package]
 name = "thekes"
-version = "2.0.0"
+version = "2.1.0"
 authors = ["Jorge Brunal <diniremix@gmail.com>"]
 edition = "2024"
 license = "MIT OR Apache-2.0"
@@ -19,7 +19,7 @@ gpui-kit = "=0.7.3"
 directories = "=6.0.0"
 rusqlite = { version = "=0.40.2", features = ["bundled"] }
 astrolabe = "=0.5.4"
-chrono = { version = "=0.4.45", default-features = false}
+chrono = { version = "=0.4.45", default-features = false }
 
 [profile.dev]
 opt-level = 0
