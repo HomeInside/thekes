@@ -4,8 +4,8 @@ use rusqlite::{Connection, OptionalExtension, Result, params};
 
 pub fn all_authors(conn: &Connection) -> Result<Vec<AuthorModel>, Error> {
     let mut stmt = conn.prepare(
-        "SELECT id, name, last_name, birth_place, date_of_birth, date_of_death, genres, biography, cover_color FROM authors",
-    )?;
+		"SELECT id, name, last_name, birth_place, date_of_birth, date_of_death, genres, biography, cover_color FROM authors",
+	)?;
 
     let authors_list = stmt.query_map([], |row| {
         Ok(AuthorModel {
@@ -87,14 +87,17 @@ pub fn search_one_author(conn: &Connection, name: String) -> Result<Vec<AuthorMo
 #[allow(dead_code)]
 pub fn add_author(conn: &Connection, author: &AuthorModel) -> Result<usize, Error> {
     println!("add_author fn");
-    let mut stmt = conn.prepare("INSERT INTO authors (name, last_name, date_of_birth, date_of_death, biography, genres) VALUES(:name, :last_name,:date_of_birth, :date_of_death, :biography, :genres)")?;
+    let mut stmt = conn.prepare("INSERT INTO authors (name, last_name, birth_place, date_of_birth, date_of_death, biography, genres, open_library_id, viaf_id) VALUES(:name, :last_name, :birth_place, :date_of_birth, :date_of_death, :biography, :genres, :open_library_id, :viaf_id)")?;
     stmt.execute(params![
         author.name,
         author.last_name,
+        author.birth_place,
         author.date_of_birth,
         author.date_of_death,
         author.biography,
-        author.genres
+        author.genres,
+        author.open_library_id,
+        author.viaf_id,
     ])?;
 
     let last_row_id = conn.last_insert_rowid() as usize;
