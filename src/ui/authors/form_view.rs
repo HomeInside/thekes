@@ -25,8 +25,12 @@ use std::sync::Arc;
 pub struct FormAuthorErrors {
     pub(crate) err_name: String,
     pub(crate) err_lastname: String,
+    pub(crate) nationality: String,
     pub(crate) date_of_birth: String,
     pub(crate) date_of_death: String,
+    pub(crate) biography: String,
+    pub(crate) openlibrary_id: String,
+    pub(crate) viaf_id: String,
 }
 
 pub struct AuthorFormView {
@@ -35,10 +39,8 @@ pub struct AuthorFormView {
     // Información personal
     pub(crate) name: Entity<InputState>,
     pub(crate) lastname: Entity<InputState>,
-    nationality: Entity<InputState>,
-    //birth_date: Entity<InputState>,
+    pub(crate) nationality: Entity<InputState>,
     pub(crate) birth_date: Entity<DatePickerState>,
-    //death_date: Entity<InputState>,
     pub(crate) death_date: Entity<DatePickerState>,
 
     // Perfil literario
@@ -49,8 +51,8 @@ pub struct AuthorFormView {
     pub(crate) biography: Entity<TextareaState>,
 
     // Información adicional
-    openlibrary_id: Entity<InputState>,
-    viaf_id: Entity<InputState>,
+    pub(crate) openlibrary_id: Entity<InputState>,
+    pub(crate) viaf_id: Entity<InputState>,
     notes: Entity<TextareaState>,
     show_additional: bool,
     date_presets: Vec<DateRangePreset>,
@@ -242,17 +244,9 @@ impl AuthorFormView {
                             ),
                     ),
             )
-            /*
-            .child(
-                div()
-                    .flex_1()
-                    .min_w_0()
-                    .child(self.date_picker("Fecha de fallecimiento(opcional)", &self.death_date)),
-            )
-            */
             .child(
                 field()
-                    .label("Fecha de fallecimiento(opcional)")
+                    .label("Fecha de fallecimiento")
                     .required(false)
                     .description_fn({
                         let msg = self.errors.date_of_death.clone();
@@ -336,8 +330,6 @@ impl Render for AuthorFormView {
                                     .w_full()
                                     .gap_4()
                                     //
-                                    // TODO
-                                    //.child(div().flex_1().min_w_0().child(Self::input_field("Nombre", &self.name)))
                                     .child(
                                         field()
                                             .label("Nombre")
@@ -355,15 +347,6 @@ impl Render for AuthorFormView {
                                             .child(Input::new(&self.name)),
                                     )
                                     //
-                                    // TODO
-                                    /*
-                                    .child(
-                                        div()
-                                            .flex_1()
-                                            .min_w_0()
-                                            .child(Self::input_field("Apellidos", &self.lastname)),
-                                    ),
-                                    */
                                     .child(
                                         field()
                                             .label("Apellidos")
@@ -379,9 +362,26 @@ impl Render for AuthorFormView {
                                                 }
                                             })
                                             .child(Input::new(&self.lastname)),
-                                    ), //
+                                    ),
                             )
-                            .child(Self::input_field("Nacionalidad", &self.nationality))
+                            //
+                            .child(
+                                field()
+                                    .label("Nacionalidad")
+                                    .required(true)
+                                    .description_fn({
+                                        let msg = self.errors.nationality.clone();
+                                        move |_, cx| {
+                                            if msg.is_empty() {
+                                                div()
+                                            } else {
+                                                div().text_color(cx.theme().danger).child(msg.clone())
+                                            }
+                                        }
+                                    })
+                                    .child(Input::new(&self.nationality)),
+                            )
+                            //
                             .child(self.date_row()),
                     ))
                     //
@@ -417,20 +417,20 @@ impl Render for AuthorFormView {
                                     ))),
                             )
                             .child(
-                                v_flex()
-                                    .gap_2()
-                                    .child(div().text_sm().font_weight(FontWeight::MEDIUM).child("Biografía"))
-                                    .child(
-                                        div()
-                                            .h(px(220.))
-                                            .w_full()
-                                            .rounded_lg()
-                                            .border_1()
-                                            .border_color(rgb(0xE5E2DC))
-                                            .bg(rgb(0xFFFFFF))
-                                            .p_2()
-                                            .child(Textarea::new(&self.biography).bordered(false).size_full()),
-                                    )
+                                field()
+                                    .label("Biografía")
+                                    .required(true)
+                                    .description_fn({
+                                        let msg = self.errors.biography.clone();
+                                        move |_, cx| {
+                                            if msg.is_empty() {
+                                                div()
+                                            } else {
+                                                div().text_color(cx.theme().danger).child(msg.clone())
+                                            }
+                                        }
+                                    })
+                                    .child(Textarea::new(&self.biography).bordered(true).h(px(220.)))
                                     .child(div().text_xs().text_color(rgb(0x85837D)).child(
                                         "Incluye su trayectoria, obras destacadas y cualquier detalle relevante.",
                                     )),
@@ -456,17 +456,51 @@ impl Render for AuthorFormView {
                                     h_flex()
                                         .w_full()
                                         .gap_4()
+                                        /*
+                                            .child(
+                                                div()
+                                                    .flex_1()
+                                                    .min_w_0()
+                                                    .child(Self::input_field("Open Library ID", &self.openlibrary_id)),
+                                            )
+                                            .child(
+                                                div()
+                                                    .flex_1()
+                                                    .min_w_0()
+                                                    .child(Self::input_field("VIAF ID", &self.viaf_id)),
+                                            ),
+                                        */
                                         .child(
-                                            div()
-                                                .flex_1()
-                                                .min_w_0()
-                                                .child(Self::input_field("Open Library ID", &self.openlibrary_id)),
+                                            field()
+                                                .label("Open Library ID")
+                                                .required(false)
+                                                .description_fn({
+                                                    let msg = self.errors.openlibrary_id.clone();
+                                                    move |_, cx| {
+                                                        if msg.is_empty() {
+                                                            div()
+                                                        } else {
+                                                            div().text_color(cx.theme().danger).child(msg.clone())
+                                                        }
+                                                    }
+                                                })
+                                                .child(Input::new(&self.openlibrary_id)),
                                         )
                                         .child(
-                                            div()
-                                                .flex_1()
-                                                .min_w_0()
-                                                .child(Self::input_field("VIAF ID", &self.viaf_id)),
+                                            field()
+                                                .label("VIAF ID")
+                                                .required(false)
+                                                .description_fn({
+                                                    let msg = self.errors.viaf_id.clone();
+                                                    move |_, cx| {
+                                                        if msg.is_empty() {
+                                                            div()
+                                                        } else {
+                                                            div().text_color(cx.theme().danger).child(msg.clone())
+                                                        }
+                                                    }
+                                                })
+                                                .child(Input::new(&self.viaf_id)),
                                         ),
                                 )
                                 .child(
