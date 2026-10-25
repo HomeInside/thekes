@@ -179,7 +179,7 @@ impl MainWindow {
         // cada modulo gestiona la conexión a la DB
         // manejar instancia del módulo de autores
         let authors = cx.new(|cx| Authors::new(window, cx, db_conn.clone()));
-        let author_form = cx.new(|cx| AuthorFormView::new(window, cx));
+        let author_form = cx.new(|cx| AuthorFormView::new(window, cx, db_conn.clone()));
         let author_details = cx.new(|cx| AuthorDetailsView::new(window, cx, db_conn.clone()));
 
         // manejar eventos de módulo autores
