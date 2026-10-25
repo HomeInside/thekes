@@ -40,7 +40,7 @@ run: fmt
 
 [group("Dev")]
 [windows]
-run:
+run: fmt
 	$env:RUST_BACKTRACE = "full"; cargo run
 
 [group("Build")]
