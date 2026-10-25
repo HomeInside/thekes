@@ -87,17 +87,21 @@ pub fn search_one_author(conn: &Connection, name: String) -> Result<Vec<AuthorMo
 #[allow(dead_code)]
 pub fn add_author(conn: &Connection, author: &AuthorModel) -> Result<usize, Error> {
     println!("add_author fn");
-    let mut stmt = conn.prepare("INSERT INTO authors (name, last_name, birth_place, date_of_birth, date_of_death, biography, genres, open_library_id, viaf_id) VALUES(:name, :last_name, :birth_place, :date_of_birth, :date_of_death, :biography, :genres, :open_library_id, :viaf_id)")?;
+    let mut stmt = conn.prepare("INSERT INTO authors (name, last_name, birth_place, date_of_birth, date_of_death, pseudonyms, writing_lang, genres, biography, movements_or_trends, open_library_id, viaf_id, notes) VALUES(:name, :last_name, :birth_place, :date_of_birth, :date_of_death, :pseudonyms, :writing_lang, :genres, :biography, :movements_or_trends, :open_library_id, :viaf_id, :notes)")?;
     stmt.execute(params![
         author.name,
         author.last_name,
         author.birth_place,
         author.date_of_birth,
         author.date_of_death,
-        author.biography,
+        author.pseudonyms,
+        author.writing_lang,
         author.genres,
+        author.biography,
+        author.movements_or_trends,
         author.open_library_id,
         author.viaf_id,
+        author.notes,
     ])?;
 
     let last_row_id = conn.last_insert_rowid() as usize;
