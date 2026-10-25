@@ -25,12 +25,17 @@ use std::sync::Arc;
 pub struct FormAuthorErrors {
     pub(crate) err_name: String,
     pub(crate) err_lastname: String,
-    pub(crate) nationality: String,
-    pub(crate) date_of_birth: String,
-    pub(crate) date_of_death: String,
-    pub(crate) biography: String,
-    pub(crate) openlibrary_id: String,
-    pub(crate) viaf_id: String,
+    pub(crate) err_nationality: String,
+    pub(crate) err_date_of_birth: String,
+    pub(crate) err_date_of_death: String,
+    pub(crate) err_genres: String,
+    pub(crate) err_pseudonyms: String,
+    pub(crate) err_langs: String,
+    pub(crate) err_biography: String,
+    pub(crate) err_literary_movements: String,
+    pub(crate) err_openlibrary_id: String,
+    pub(crate) err_viaf_id: String,
+    pub(crate) err_notes: String,
 }
 
 pub struct AuthorFormView {
@@ -45,15 +50,15 @@ pub struct AuthorFormView {
 
     // Perfil literario
     pub(crate) genre: Entity<InputState>,
-    pseudonyms: Entity<InputState>,
-    languages: Entity<InputState>,
-    literary_movements: Entity<InputState>,
+    pub(crate) pseudonyms: Entity<InputState>,
+    pub(crate) languages: Entity<InputState>,
+    pub(crate) literary_movements: Entity<InputState>,
     pub(crate) biography: Entity<TextareaState>,
 
     // Información adicional
     pub(crate) openlibrary_id: Entity<InputState>,
     pub(crate) viaf_id: Entity<InputState>,
-    notes: Entity<TextareaState>,
+    pub(crate) notes: Entity<TextareaState>,
     show_additional: bool,
     date_presets: Vec<DateRangePreset>,
     pub(crate) errors: FormAuthorErrors,
@@ -115,22 +120,23 @@ impl AuthorFormView {
 
         Self {
             color_config: ColorConfig::default(),
-            name: cx.new(|cx| InputState::new(window, cx).placeholder("Nombre")),
-            lastname: cx.new(|cx| InputState::new(window, cx).placeholder("Apellido")),
+            name: cx.new(|cx| InputState::new(window, cx).placeholder("names")),
+            lastname: cx.new(|cx| InputState::new(window, cx).placeholder("last name")),
             nationality: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. Scottish")),
             birth_date,
             death_date,
-            genre: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. Fantasía, ciencia ficción")),
-            pseudonyms: cx.new(|cx| InputState::new(window, cx).placeholder("Separa los seudónimos por comas")),
-            languages: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. Español, inglés")),
-            literary_movements: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. Modernismo, realismo mágico")),
+            genre: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. fiction, detective stories")),
+            pseudonyms: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. A.C. Doyle, (ying) Kenan, daoer")),
+            languages: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. English, Spanish")),
+            literary_movements: cx
+                .new(|cx| InputState::new(window, cx).placeholder("Ej. fiction, mystery & detective, general")),
             biography: cx.new(|cx| {
                 TextareaState::new(window, cx)
                     .rows(6)
                     .placeholder("Escribe aquí la biografía del autor...")
             }),
-            openlibrary_id: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. OL31353A")),
-            viaf_id: cx.new(|cx| InputState::new(window, cx).placeholder("Identificador VIAF")),
+            openlibrary_id: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. OL161167A")),
+            viaf_id: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. 65283845")),
             notes: cx.new(|cx| {
                 TextareaState::new(window, cx)
                     .rows(3)
@@ -227,7 +233,7 @@ impl AuthorFormView {
                             .label("Fecha de nacimiento")
                             .required(true)
                             .description_fn({
-                                let msg = self.errors.date_of_birth.clone();
+                                let msg = self.errors.err_date_of_birth.clone();
                                 move |_, cx| {
                                     if msg.is_empty() {
                                         div()
@@ -249,7 +255,7 @@ impl AuthorFormView {
                     .label("Fecha de fallecimiento")
                     .required(false)
                     .description_fn({
-                        let msg = self.errors.date_of_death.clone();
+                        let msg = self.errors.err_date_of_death.clone();
                         move |_, cx| {
                             if msg.is_empty() {
                                 div()
@@ -370,7 +376,7 @@ impl Render for AuthorFormView {
                                     .label("Nacionalidad")
                                     .required(true)
                                     .description_fn({
-                                        let msg = self.errors.nationality.clone();
+                                        let msg = self.errors.err_nationality.clone();
                                         move |_, cx| {
                                             if msg.is_empty() {
                                                 div()
@@ -393,14 +399,53 @@ impl Render for AuthorFormView {
                         div(),
                         v_flex()
                             .gap_4()
-                            .child(Self::input_field("Géneros literarios", &self.genre))
+                            //
+                            .child(
+                                field()
+                                    .label("Géneros literarios")
+                                    .required(true)
+                                    .description_fn({
+                                        let msg = self.errors.err_genres.clone();
+                                        move |_, cx| {
+                                            if msg.is_empty() {
+                                                div()
+                                            } else {
+                                                div().text_color(cx.theme().danger).child(msg.clone())
+                                            }
+                                        }
+                                    })
+                                    .child(Input::new(&self.genre)),
+                            )
                             .child(
                                 div()
                                     .text_xs()
                                     .text_color(rgb(0x85837D))
                                     .child("Puedes introducir varios valores separados por comas"),
                             )
-                            .child(Self::input_field("Seudónimo(s)", &self.pseudonyms))
+                            //
+                            .child(
+                                field()
+                                    .label("Seudónimo(s)")
+                                    .required(false)
+                                    .description_fn({
+                                        let msg = self.errors.err_pseudonyms.clone();
+                                        move |_, cx| {
+                                            if msg.is_empty() {
+                                                div()
+                                            } else {
+                                                div().text_color(cx.theme().danger).child(msg.clone())
+                                            }
+                                        }
+                                    })
+                                    .child(Input::new(&self.pseudonyms)),
+                            )
+                            .child(
+                                div()
+                                    .text_xs()
+                                    .text_color(rgb(0x85837D))
+                                    .child("Puedes introducir varios valores separados por comas"),
+                            )
+                            //
                             .child(
                                 h_flex()
                                     .w_full()
@@ -411,17 +456,30 @@ impl Render for AuthorFormView {
                                             .min_w_0()
                                             .child(Self::input_field("Idiomas de escritura", &self.languages)),
                                     )
-                                    .child(div().flex_1().min_w_0().child(Self::input_field(
-                                        "Movimientos o corrientes",
-                                        &self.literary_movements,
-                                    ))),
+                                    //
+                                    .child(
+                                        field()
+                                            .label("Movimientos o corrientes")
+                                            .required(false)
+                                            .description_fn({
+                                                let msg = self.errors.err_literary_movements.clone();
+                                                move |_, cx| {
+                                                    if msg.is_empty() {
+                                                        div()
+                                                    } else {
+                                                        div().text_color(cx.theme().danger).child(msg.clone())
+                                                    }
+                                                }
+                                            })
+                                            .child(Input::new(&self.literary_movements)),
+                                    ),
                             )
                             .child(
                                 field()
                                     .label("Biografía")
                                     .required(true)
                                     .description_fn({
-                                        let msg = self.errors.biography.clone();
+                                        let msg = self.errors.err_biography.clone();
                                         move |_, cx| {
                                             if msg.is_empty() {
                                                 div()
@@ -456,26 +514,12 @@ impl Render for AuthorFormView {
                                     h_flex()
                                         .w_full()
                                         .gap_4()
-                                        /*
-                                            .child(
-                                                div()
-                                                    .flex_1()
-                                                    .min_w_0()
-                                                    .child(Self::input_field("Open Library ID", &self.openlibrary_id)),
-                                            )
-                                            .child(
-                                                div()
-                                                    .flex_1()
-                                                    .min_w_0()
-                                                    .child(Self::input_field("VIAF ID", &self.viaf_id)),
-                                            ),
-                                        */
                                         .child(
                                             field()
                                                 .label("Open Library ID")
                                                 .required(false)
                                                 .description_fn({
-                                                    let msg = self.errors.openlibrary_id.clone();
+                                                    let msg = self.errors.err_openlibrary_id.clone();
                                                     move |_, cx| {
                                                         if msg.is_empty() {
                                                             div()
@@ -491,7 +535,7 @@ impl Render for AuthorFormView {
                                                 .label("VIAF ID")
                                                 .required(false)
                                                 .description_fn({
-                                                    let msg = self.errors.viaf_id.clone();
+                                                    let msg = self.errors.err_viaf_id.clone();
                                                     move |_, cx| {
                                                         if msg.is_empty() {
                                                             div()
@@ -503,21 +547,22 @@ impl Render for AuthorFormView {
                                                 .child(Input::new(&self.viaf_id)),
                                         ),
                                 )
+                                //
                                 .child(
-                                    v_flex()
-                                        .gap_2()
-                                        .child(div().text_sm().font_weight(FontWeight::MEDIUM).child("Notas internas"))
-                                        .child(
-                                            div()
-                                                .h(px(120.))
-                                                .w_full()
-                                                .rounded_lg()
-                                                .border_1()
-                                                .border_color(rgb(0xE5E2DC))
-                                                .bg(rgb(0xFFFFFF))
-                                                .p_2()
-                                                .child(Textarea::new(&self.notes).bordered(false).size_full()),
-                                        ),
+                                    field()
+                                        .label("Notas internas")
+                                        .required(false)
+                                        .description_fn({
+                                            let msg = self.errors.err_notes.clone();
+                                            move |_, cx| {
+                                                if msg.is_empty() {
+                                                    div()
+                                                } else {
+                                                    div().text_color(cx.theme().danger).child(msg.clone())
+                                                }
+                                            }
+                                        })
+                                        .child(Textarea::new(&self.notes).bordered(true).h(px(220.))),
                                 )
                         }),
                     )),
