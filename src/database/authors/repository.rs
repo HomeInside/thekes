@@ -87,8 +87,15 @@ pub fn search_one_author(conn: &Connection, name: String) -> Result<Vec<AuthorMo
 #[allow(dead_code)]
 pub fn add_author(conn: &Connection, author: &AuthorModel) -> Result<usize, Error> {
     println!("add_author fn");
-    let mut stmt = conn.prepare("INSERT INTO authors (name, last_name) VALUES(:name, :last_name)")?;
-    stmt.execute(params![author.name, author.last_name])?;
+    let mut stmt = conn.prepare("INSERT INTO authors (name, last_name, date_of_birth, date_of_death, biography, genres) VALUES(:name, :last_name,:date_of_birth, :date_of_death, :biography, :genres)")?;
+    stmt.execute(params![
+        author.name,
+        author.last_name,
+        author.date_of_birth,
+        author.date_of_death,
+        author.biography,
+        author.genres
+    ])?;
 
     let last_row_id = conn.last_insert_rowid() as usize;
     //
