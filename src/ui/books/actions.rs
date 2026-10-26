@@ -1,9 +1,9 @@
 use super::Books;
 use crate::ui::books::BookViewEvent;
 use crate::ui::dialogs;
+use gpui_kit::Action;
 use gpui_kit::component::WindowExt;
 use gpui_kit::component::notification::NotificationType;
-use gpui_kit::{Action, AppContext};
 use gpui_kit::{Context, Window};
 
 #[derive(Clone, PartialEq)]

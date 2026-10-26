@@ -234,7 +234,7 @@ impl Authors {
 
 impl Render for Authors {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let compact = window.viewport_size().width < px(700.);
+        let _compact = window.viewport_size().width < px(700.);
 
         div()
             // deben ir en la raiz para que puedan propagarse
