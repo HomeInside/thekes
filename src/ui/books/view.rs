@@ -219,7 +219,12 @@ impl Books {
                                 //TO FIX es autor_id
                                 //.child(book.author)
                                 .child(book.synopsis.clone())
-                                .child(div().text_xs().text_color(rgb(0x777777)).child("1900")),
+                                .child(
+                                    div()
+                                        .text_xs()
+                                        .text_color(rgb(0x777777))
+                                        .child(book.published_date.to_string()),
+                                ),
                         ),
                     )
                     .child(
