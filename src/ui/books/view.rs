@@ -18,6 +18,12 @@ use gpui_kit::*;
 use gpui_kit::{Context, Entity, Render, Styled, Window};
 use std::sync::Arc;
 
+#[derive(Debug, Clone)]
+pub enum BookViewEvent {
+    ShowForm,
+    List,
+    Details { info: Box<BooksModel> },
+}
 pub struct Books {
     color_config: ColorConfig,
     pub input_search: Entity<InputState>,
@@ -27,6 +33,8 @@ pub struct Books {
     pub(crate) result_count: usize,
     pub(crate) book_service: BookService,
 }
+
+impl EventEmitter<BookViewEvent> for Books {}
 
 impl Render for Books {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
@@ -188,7 +196,9 @@ impl Books {
                     .h(px(225.))
                     .w_full()
                     .rounded_lg()
-                    .bg(rgb(book.cover_color))
+                    //TODO
+                    .bg(rgb(book.cover_color.unwrap_or(0x000000)))
+                    //.bg(rgb(0xF5F5F5))
                     .flex()
                     .flex_col()
                     .justify_end()
@@ -240,10 +250,19 @@ impl Books {
                                         .unwrap_or_else(|| "https://www.amazon.com/amz-books/store".to_string());
 
                                     menu.menu_with_icon(
+                                        "Detalles",
+                                        AssetIconName::BookText,
+                                        Box::new(BookAction {
+                                            book_id,
+                                            book_op: BookOperation::Details,
+                                        }),
+                                    )
+                                    .separator()
+                                    .menu_with_icon(
                                         "Favorito",
                                         IconName::Heart,
                                         Box::new(BookAction {
-                                            book_id: book_id as u64,
+                                            book_id,
                                             book_op: BookOperation::Favorite,
                                         }),
                                     )
@@ -251,7 +270,7 @@ impl Books {
                                         "Estoy leyendo",
                                         AssetIconName::BookOpenCheck,
                                         Box::new(BookAction {
-                                            book_id: book_id as u64,
+                                            book_id,
                                             book_op: BookOperation::Reading,
                                         }),
                                     )
@@ -259,7 +278,7 @@ impl Books {
                                         "Quiero leer",
                                         AssetIconName::ListTodo,
                                         Box::new(BookAction {
-                                            book_id: book_id as u64,
+                                            book_id,
                                             book_op: BookOperation::WantToRead,
                                         }),
                                     )
@@ -267,26 +286,18 @@ impl Books {
                                         "Finalizado",
                                         AssetIconName::CircleCheckBig,
                                         Box::new(BookAction {
-                                            book_id: book_id as u64,
+                                            book_id,
                                             book_op: BookOperation::Finished,
                                         }),
                                     )
                                     .separator()
-                                    .menu_with_icon(
-                                        "Detalles",
-                                        AssetIconName::BookText,
-                                        Box::new(BookAction {
-                                            book_id: book_id as u64,
-                                            book_op: BookOperation::Details,
-                                        }),
-                                    )
                                     .link("Comprar en línea", buy)
                                     .separator()
                                     .menu_with_icon(
                                         "Eliminar",
                                         AssetIconName::Trash,
                                         Box::new(BookAction {
-                                            book_id: book_id as u64,
+                                            book_id,
                                             book_op: BookOperation::Delete,
                                         }),
                                     )
