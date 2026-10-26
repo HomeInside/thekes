@@ -270,7 +270,7 @@ impl AuthorFormView {
         }
     }
 
-    fn clean_fields(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+    pub fn clean_fields(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         self.name.update(cx, |state, cx| {
             state.set_value("", window, cx);
         });
@@ -310,5 +310,8 @@ impl AuthorFormView {
         self.notes.update(cx, |state, cx| {
             state.set_value("", window, cx);
         });
+
+        // limpiar la lista de errores
+        self.errors = Default::default();
     }
 }
