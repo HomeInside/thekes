@@ -36,7 +36,16 @@ impl MainWindow {
         //println!("load_active_module fn: {:?}", self.active_module);
         match self.active_module {
             ActiveModule::Dashboard => self.dashboard.clone().into_any_element(),
-            ActiveModule::Books => self.books.clone().into_any_element(),
+            ActiveModule::Books => {
+                if self.show_book_form {
+                    //TODO debe ser algo como self.book_form
+                    self.books.clone().into_any_element()
+                } else if self.show_books_details {
+                    self.books_details.clone().into_any_element()
+                } else {
+                    self.books.clone().into_any_element()
+                }
+            }
             ActiveModule::Authors => {
                 if self.show_author_form {
                     self.author_form.clone().into_any_element()
