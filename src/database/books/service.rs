@@ -34,6 +34,14 @@ impl BookService {
 
         repository::all_books(&conn)
     }
+
+    pub fn get_one(&self, item_id: i32) -> Result<Option<BooksModel>> {
+        println!("BookService::get_one fn");
+        let conn = self.db.get_conn().lock().map_err(|_| rusqlite::Error::InvalidQuery)?;
+
+        repository::search_book_by_id(&conn, item_id)
+    }
+
     pub fn by_author(&self, item_id: i32) -> Result<Vec<BooksModel>> {
         println!("BookService::by_author fn");
         let conn = self.db.get_conn().lock().map_err(|_| rusqlite::Error::InvalidQuery)?;

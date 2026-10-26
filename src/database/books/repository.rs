@@ -1,5 +1,5 @@
-use rusqlite::Error;
 use rusqlite::{Connection, Result, params};
+use rusqlite::{Error, OptionalExtension};
 
 use super::model::BooksModel;
 
@@ -55,6 +55,37 @@ pub fn delete_book(conn: &Connection, id: i32) -> Result<usize> {
     let mut stmt = conn.prepare("DELETE FROM books WHERE id = :id")?;
     let last_id = stmt.execute(&[(":id", &id)])?;
     Ok(last_id)
+}
+
+pub fn search_book_by_id(conn: &Connection, item_id: i32) -> Result<Option<BooksModel>> {
+    conn.query_row(
+        "SELECT id,title,author_id,synopsis,lang,page_count,format_type,genres,published_date,publisher,open_library_id,isbn,buy,cover_color,created_at FROM books
+         WHERE id = ?1",
+        params![item_id],
+        |row| {
+            Ok(BooksModel {
+                id: row.get("id")?,
+                title: row.get("title")?,
+                author_id: row.get("author_id")?,
+                synopsis: row.get("synopsis")?,
+                lang: row.get("lang")?,
+                //cover_bytes: row.get("cover_bytes")?,
+                page_count: row.get("page_count")?,
+                format_type: row.get("format_type")?,
+                genres: row.get("genres")?,
+                //subjects: row.get("subjects")?,
+                published_date:row.get("published_date")?,
+                publisher: row.get("publisher")?,
+                open_library_id: row.get("open_library_id")?,
+                isbn: row.get("isbn")?,
+                buy: row.get("buy")?,
+                cover_color: row.get("cover_color")?,
+                created_at: row.get("created_at")?,
+                //
+                ..Default::default()
+            })
+        },
+    ).optional()
 }
 
 #[allow(dead_code)]
