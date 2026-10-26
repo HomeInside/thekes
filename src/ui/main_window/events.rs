@@ -15,32 +15,42 @@ impl MainWindow {
     ///
     pub fn subscribe_author_events<T>(
         entity: &Entity<T>,
-        _window: &mut Window,
+        window: &mut Window,
         cx: &mut Context<Self>,
         source: &'static str,
     ) -> Subscription
     where
         T: EventEmitter<AuthorViewEvent> + 'static,
     {
-        /*
-        cx.subscribe_in(table, window, |this, _table, event: &BooksEvent, window, cx| {
-            this.handle_subs(event, window, cx);
-        })
-        */
-
-        cx.subscribe(entity, move |this, _entity, event: &AuthorViewEvent, cx| {
-            println!("{source} event {:?}", event);
-            this.handle_subs(event, cx);
-        })
+        cx.subscribe_in(
+            entity,
+            window,
+            move |this, _entity, event: &AuthorViewEvent, window, cx| {
+                println!("{source} event {:?}", event);
+                this.handle_subs(event, window, cx);
+            },
+        )
     }
 
-    pub fn handle_subs(&mut self, event: &AuthorViewEvent, cx: &mut Context<Self>) {
+    pub fn handle_subs(&mut self, event: &AuthorViewEvent, window: &mut Window, cx: &mut Context<Self>) {
+        //pub fn handle_subs(&mut self, event: &AuthorViewEvent, cx: &mut Context<Self>) {
         match event {
             AuthorViewEvent::ShowForm => {
+                self.author_form.update(cx, |author_detail, cx| {
+                    println!("aqui limpia los campos del showform");
+                    author_detail.clean_fields(window, cx);
+                });
                 self.show_author_form = true;
                 self.show_author_details = false;
             }
             AuthorViewEvent::List => {
+                self.authors.update(cx, |authors, cx| {
+                    println!("================================");
+                    println!("AuthorViewEvent::List");
+                    println!("llamado a load_authors");
+                    println!("================================");
+                    authors.load_authors(cx);
+                });
                 self.show_author_form = false;
                 self.show_author_details = false;
             }
