@@ -10,6 +10,7 @@ use gpui_kit::component::input::InputState;
 use gpui_kit::component::notification::NotificationType;
 use gpui_kit::{Action, AppContext};
 use gpui_kit::{Context, Window};
+use std::collections::HashSet;
 use std::sync::Arc;
 
 #[derive(Clone, PartialEq)]
@@ -40,6 +41,9 @@ impl Authors {
             authors_list: Vec::new(),
             result_count: 0,
             author_service,
+            result_bio: String::from("—"),
+            result_genre: String::from("—"),
+            result_lang: String::from("—"),
             book_service,
         }
     }
@@ -54,15 +58,57 @@ impl Authors {
         println!("Authors::load_authors fn");
         match self.author_service.get_all() {
             Ok(list) => {
-                println!("Autores encontrados: {}", list.len());
+                let mut gen_uniq = HashSet::new();
+                let mut lang_uniq = HashSet::new();
+
+                // conteo de autores
                 self.result_count = list.len();
+                //
+                // conteo de genres
+                for author in &list {
+                    // genres
+                    for genre in author.genres.split(",") {
+                        let g = genre.trim().to_lowercase();
+                        println!("g: {}", g);
+                        if !g.is_empty() {
+                            gen_uniq.insert(g);
+                        }
+                    }
+                    // writing_lang
+                    // esto debe validarse al momento de guardar
+                    // aquí `None` y `Some("")`, y `Some(" ")` se tratan igual
+                    let lang = author.writing_lang.as_deref().map(str::trim).unwrap_or("");
+                    if !lang.is_empty() {
+                        lang_uniq.insert(lang);
+                    }
+                }
+                //
+                self.result_genre = if gen_uniq.len() > 0 {
+                    gen_uniq.len().to_string()
+                } else {
+                    "—".into()
+                };
+                //
+                self.result_lang = if lang_uniq.len() > 0 {
+                    lang_uniq.len().to_string()
+                } else {
+                    "—".into()
+                };
+                //
+                // conteo de biography
+                let bio_count = list.iter().filter(|a| a.biography.trim().is_empty()).count();
+
+                self.result_bio = if bio_count > 0 {
+                    bio_count.to_string()
+                } else {
+                    "—".into()
+                };
+                //
+                // lista de autores
                 self.authors_list = list;
-                // organizar la ui aqui
-                //window.push_notification((NotificationType::Success, "autores cargados"), cx);
             }
             Err(error) => {
                 eprintln!("Error al consultar autores: {error}");
-                //window.push_notification((NotificationType::Error, "Error al consultar autores"), cx);
             }
         }
         cx.notify();
