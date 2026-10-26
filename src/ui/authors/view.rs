@@ -15,7 +15,6 @@ use gpui_kit::component::input::{Input, InputState};
 use gpui_kit::component::menu::DropdownMenu;
 use gpui_kit::component::scroll::ScrollableElement;
 use gpui_kit::component::{Icon, IconName};
-use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::rgb;
 use gpui_kit::*;
 use gpui_kit::{Context, Entity, Render, Styled, Window};
@@ -35,6 +34,9 @@ pub struct Authors {
     pub(crate) input_search: Entity<InputState>,
     pub(crate) authors_list: Vec<AuthorModel>,
     pub(crate) result_count: usize,
+    pub(crate) result_bio: String,
+    pub(crate) result_genre: String,
+    pub(crate) result_lang: String,
     pub(crate) author_service: AuthorService,
     pub(crate) book_service: BookService,
 }
@@ -286,34 +288,14 @@ impl Render for Authors {
             .child(
                 div()
                     .w_full()
-                    .grid_cols(3)
+                    .grid_cols(4)
                     .grid()
-                    .gap_3()
-                    .when(compact, |this| this.grid_cols(1))
-                    .child(self.authors_dashboard("Autores", self.result_count.to_string(), rgb(0xC6D2B9))),
-                //
-                //TO FIX agregar mas info para las card
-                //.child(self.authors_dashboard("Obras", "—".to_string(), rgb(0xC3CBE0)))
-                //.child(self.authors_dashboard("Sin biografía", "—".to_string(), rgb(0xD6B5A3))),
+                    .gap_1()
+                    .child(self.authors_dashboard("Autores", self.result_count.to_string(), rgb(0xC6D2B9)))
+                    .child(self.authors_dashboard("Géneros", self.result_genre.clone(), rgb(0xC3CBE0)))
+                    .child(self.authors_dashboard("Idiomas", self.result_lang.clone(), rgb(0xD6B5A3)))
+                    .child(self.authors_dashboard("Sin biografía", self.result_bio.clone(), rgb(0xD6B5A3))),
             )
-            //
-            // botón nuevo
-            // TO FIX si se mueve de sitio
-            /*.child(
-                h_flex()
-                    .items_center()
-                    .justify_between()
-                    .gap_3()
-                    .child("")
-                    .child("")
-                    .child(
-                        Button::new("btn-add-author")
-                            .primary()
-                            //.icon(AssetIconName::Plus)
-                            .label("Nuevo")
-                            .on_click(cx.listener(|this, _, _, cx| this.click_btn_new_author(cx))),
-                    ),
-            )*/
             //
             // Búsqueda
             .child(
