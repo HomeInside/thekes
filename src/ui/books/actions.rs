@@ -1,9 +1,9 @@
 use super::Books;
+use crate::ui::books::BookViewEvent;
 use crate::ui::dialogs;
-//use crate::ui::dialogs::ConfirmDialog;
-use gpui_kit::Action;
 use gpui_kit::component::WindowExt;
 use gpui_kit::component::notification::NotificationType;
+use gpui_kit::{Action, AppContext};
 use gpui_kit::{Context, Window};
 
 #[derive(Clone, PartialEq)]
@@ -19,7 +19,7 @@ pub enum BookOperation {
 #[derive(Action, Clone, PartialEq)]
 #[action(namespace = view_book, no_json)]
 pub struct BookAction {
-    pub book_id: u64,
+    pub book_id: i32,
     pub book_op: BookOperation,
 }
 
@@ -62,29 +62,50 @@ impl Books {
         cx.notify();
     } //click_btn_search
 
-    pub fn toggle_favorite(&mut self, book_id: u64, _cx: &mut Context<Self>) {
+    pub fn toggle_favorite(&mut self, book_id: i32, _cx: &mut Context<Self>) {
         println!("toggle_favorite fn");
         println!("toggle_favorite book_id: {}", book_id);
     }
-    pub fn set_reading(&mut self, book_id: u64, _cx: &mut Context<Self>) {
+    pub fn set_reading(&mut self, book_id: i32, _cx: &mut Context<Self>) {
         println!("set_reading fn");
         println!("set_reading book_id: {}", book_id);
     }
-    pub fn set_want_to_read(&mut self, book_id: u64, _cx: &mut Context<Self>) {
+    pub fn set_want_to_read(&mut self, book_id: i32, _cx: &mut Context<Self>) {
         println!("set_want_to_read fn");
         println!("set_want_to_read book_id: {}", book_id);
     }
-    pub fn set_finished(&mut self, book_id: u64, _cx: &mut Context<Self>) {
+    pub fn set_finished(&mut self, book_id: i32, _cx: &mut Context<Self>) {
         println!("set_finished fn");
         println!("set_finished book_id: {}", book_id);
     }
 
-    pub fn show_details(&mut self, book_id: u64, _cx: &mut Context<Self>) {
+    pub fn show_details(&mut self, book_id: i32, window: &mut Window, cx: &mut Context<Self>) {
         println!("show_details fn");
         println!("show_details book_id: {}", book_id);
+
+        match self.book_service.get_one(book_id) {
+            //TO CHECK
+            Ok(Some(book)) => {
+                println!("enviando evento book ShowDetails");
+                cx.emit(BookViewEvent::Details { info: Box::new(book) });
+            }
+            Ok(None) => {
+                let msg = format!("no se encontró el libro con ID: {}", book_id);
+                eprintln!("{}", msg);
+
+                window.push_notification((NotificationType::Warning, msg), cx);
+            }
+            Err(error) => {
+                let msg = format!("Ocurrió un error, al consultar por Id de libro: {}", error);
+                eprintln!("{}", msg);
+
+                window.push_notification((NotificationType::Error, msg), cx);
+            }
+        }
+        cx.notify();
     }
 
-    pub fn delete_item(&mut self, book_id: u64, window: &mut Window, cx: &mut Context<Self>) {
+    pub fn delete_item(&mut self, book_id: i32, window: &mut Window, cx: &mut Context<Self>) {
         println!("delete_item book_id: {}", book_id);
 
         dialogs::confirm(
@@ -130,7 +151,7 @@ impl Books {
                 self.set_finished(action.book_id, cx);
             }
             BookOperation::Details => {
-                self.show_details(action.book_id, cx);
+                self.show_details(action.book_id, window, cx);
             }
             BookOperation::Delete => {
                 self.delete_item(action.book_id, window, cx);
