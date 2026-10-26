@@ -37,6 +37,7 @@ pub fn init_db(conn: &Connection) -> Result<(), Box<dyn Error>> {
         open_library_id TEXT NULL,
         isbn TEXT NULL,
         buy TEXT NULL,
+        cover_color INTEGER NULL,
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at TEXT NULL DEFAULT CURRENT_TIMESTAMP
 	);

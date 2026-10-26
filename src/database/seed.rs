@@ -33,9 +33,9 @@ pub fn add_default_author(conn: &Connection) -> Result<(), Box<dyn Error>> {
     )?;
     conn.execute(
         "INSERT INTO books (
-            title,author_id,synopsis,lang,cover,page_count,format_type,genres,published_date,publisher,open_library_id,buy
+            title,author_id,synopsis,lang,cover,page_count,format_type,genres,published_date,publisher,open_library_id,buy, cover_color
         )
-        SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12
+        SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13
         WHERE NOT EXISTS (
             SELECT 1 FROM books
             WHERE title = ?1 AND author_id = ?2
@@ -43,16 +43,17 @@ pub fn add_default_author(conn: &Connection) -> Result<(), Box<dyn Error>> {
         params![
             "The Adventures of Sherlock Holmes",
             1,
-            "The Adventures of Sherlock Holmes is a collection of twelve short stories by Arthur Conan Doyle, first published on 14 October 1892.",
+            "The Adventures of Sherlock Holmes is a collection of twelve short stories by Arthur Conan Doyle, first published on 14 October 1892. It contains the earliest short stories featuring the consulting detective Sherlock Holmes, which had been published in twelve monthly issues of The Strand Magazine from July 1891 to June 1892. The stories are collected in the same sequence, which is not supported by any fictional chronology. The only characters common to all twelve are Holmes and Dr. Watson and all are related in first-person narrative from Watson's point of view.",
             "English",
-            "https://covers.openlibrary.org/b/olid/OL47078012M-S.jpg",
+            "https://covers.openlibrary.org/b/id/12918470-L.jpg",
             307,
             "physical_book",
             Some("classic literature, mistery, crime & mystery fiction"),
             1920,
             "A. L. Burt Company, Publishers",
-            "OL47078012M",
-            "https://www.amazon.com/s?k=The+Adventures+of+Sherlock+Holmes+Arthur+Conan+Doyle&i=stripbooks"
+            "OL262421W",
+            "https://www.amazon.com/s?k=The+Adventures+of+Sherlock+Holmes+Arthur+Conan+Doyle&i=stripbooks",
+            Some(0x000000),
         ],
     )?;
 
