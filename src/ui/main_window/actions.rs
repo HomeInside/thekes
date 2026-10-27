@@ -38,8 +38,7 @@ impl MainWindow {
             ActiveModule::Dashboard => self.dashboard.clone().into_any_element(),
             ActiveModule::Books => {
                 if self.show_book_form {
-                    //TODO debe ser algo como self.book_form
-                    self.books.clone().into_any_element()
+                    self.book_form.clone().into_any_element()
                 } else if self.show_books_details {
                     self.books_details.clone().into_any_element()
                 } else {
