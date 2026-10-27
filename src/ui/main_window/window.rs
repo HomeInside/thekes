@@ -2,7 +2,7 @@ use super::ColorConfig;
 use super::subcriptions::{ActiveModule, NavigateTo};
 use crate::database::DatabaseService;
 use crate::ui::authors::{AuthorDetailsView, AuthorFormView, Authors};
-use crate::ui::books::{BookDetailsView, Books};
+use crate::ui::books::{BookDetailsView, BookFormView, Books};
 use crate::ui::dashboard::Dashboard;
 use crate::ui::sidebar::AppSidebar;
 use crate::utils::consts;
@@ -26,8 +26,10 @@ pub struct MainWindow {
     pub(crate) color_config: ColorConfig,
     //
     pub(crate) dashboard: Entity<Dashboard>,
-    pub(crate) books: Entity<Books>,
+    //
     // libros crear/editar
+    pub(crate) books: Entity<Books>,
+    pub(crate) book_form: Entity<BookFormView>,
     pub(crate) show_book_form: bool,
     // libros detalles
     pub(crate) books_details: Entity<BookDetailsView>,
@@ -180,10 +182,13 @@ impl MainWindow {
     pub fn new(window: &mut Window, cx: &mut Context<Self>, db_conn: Arc<DatabaseService>) -> Self {
         let sidebar = cx.new(|_| AppSidebar::new());
         let dashboard = cx.new(|_| Dashboard::new());
-        let books = cx.new(|cx| Books::new(window, cx, db_conn.clone()));
-        let books_details = cx.new(|cx| BookDetailsView::new(window, cx, db_conn.clone()));
         //
         // cada modulo gestiona la conexión a la DB
+        //
+        let books = cx.new(|cx| Books::new(window, cx, db_conn.clone()));
+        let book_form = cx.new(|cx| BookFormView::new(window, cx, db_conn.clone()));
+        let books_details = cx.new(|cx| BookDetailsView::new(window, cx, db_conn.clone()));
+        //
         // manejar instancia del módulo de autores
         let authors = cx.new(|cx| Authors::new(window, cx, db_conn.clone()));
         let author_form = cx.new(|cx| AuthorFormView::new(window, cx, db_conn.clone()));
@@ -191,11 +196,12 @@ impl MainWindow {
 
         // manejar eventos de módulo autores
         let subs_author_view = Self::subscribe_author_events(&authors, window, cx, "authors_list");
-        let subs_author_form = Self::subscribe_author_events(&author_form, window, cx, "authors_form");
+        let subs_author_form = Self::subscribe_author_events(&author_form, window, cx, "author_form");
         let subs_author_details = Self::subscribe_author_events(&author_details, window, cx, "authors_details");
+        //
         // manejar eventos de módulo libros
         let subs_books_view = Self::subscribe_books_events(&books, window, cx, "books_list");
-        //let subs_books_form = Self::subscribe_books_events(&books_form, window, cx, "books_form");
+        let subs_books_form = Self::subscribe_books_events(&book_form, window, cx, "books_form");
         let subs_books_details = Self::subscribe_books_events(&books_details, window, cx, "books_details");
 
         // manejar eventos de la sidebar
@@ -228,6 +234,7 @@ impl MainWindow {
             dashboard,
             // libros crear/editar
             books,
+            book_form,
             show_book_form: false,
             books_details,
             show_books_details: false,
@@ -241,11 +248,13 @@ impl MainWindow {
             show_author_details: false,
             _subscriptions: vec![
                 subs_sidebar,
+                //
                 subs_author_view,
                 subs_author_form,
                 subs_author_details,
+                //
                 subs_books_view,
-                //subs_books_form
+                subs_books_form,
                 subs_books_details,
             ],
             db_conn,
