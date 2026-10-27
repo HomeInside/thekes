@@ -45,7 +45,6 @@ pub struct FormBookErrors {
 pub struct BookFormView {
     pub(crate) color_config: ColorConfig,
     pub(crate) title: Entity<InputState>,
-    //pub(crate) author_id: Entity<InputState>,
     pub(crate) author_id: Entity<SelectState<SearchableVec<String>>>,
     pub(crate) synopsis: Entity<TextareaState>,
     pub(crate) lang: Entity<InputState>,
@@ -92,7 +91,7 @@ impl BookFormView {
         });
 
         //let author_list: Vec<String> = if let Some(list) = authors { list } else { vec![] };
-        let author_list: Vec<String> = vec!["Arthur".into(), "Conan".into(), "Doyle".into()];
+        let author_list: Vec<String> = vec!["Select author".into(), "Arthur".into(), "Conan".into(), "Doyle".into()];
 
         // si estamos editando y `author_id` existe
         /*
@@ -267,7 +266,7 @@ impl Render for BookFormView {
                                     .child(
                                         div().flex_1().min_w_0().child(
                                             field()
-                                                .label("Selecciona el autor")
+                                                .label("Autor")
                                                 .required(true)
                                                 .description_fn({
                                                     let msg = self.errors.err_author_id.clone();
@@ -330,20 +329,42 @@ impl Render for BookFormView {
                                 h_flex()
                                     .w_full()
                                     .gap_4()
+                                    //
                                     .child(
-                                        div().flex_1().min_w_0().child(
-                                            field().label("Fecha de publicación").required(false).child(
+                                        field()
+                                            .label("Fecha de publicación")
+                                            .required(true)
+                                            .description_fn({
+                                                let msg = self.errors.err_published_date.clone();
+                                                move |_, cx| {
+                                                    if msg.is_empty() {
+                                                        div()
+                                                    } else {
+                                                        div().text_color(cx.theme().danger).child(msg.clone())
+                                                    }
+                                                }
+                                            })
+                                            .child(
                                                 DatePicker::new(&self.published_date)
                                                     .placeholder("Select a date...")
                                                     .cleanable(true),
                                             ),
-                                        ),
                                     )
                                     .child(
-                                        div()
-                                            .flex_1()
-                                            .min_w_0()
-                                            .child(Self::input_field("Editorial", &self.publisher)),
+                                        field()
+                                            .label("Editorial")
+                                            .required(false)
+                                            .description_fn({
+                                                let msg = self.errors.err_publisher.clone();
+                                                move |_, cx| {
+                                                    if msg.is_empty() {
+                                                        div()
+                                                    } else {
+                                                        div().text_color(cx.theme().danger).child(msg.clone())
+                                                    }
+                                                }
+                                            })
+                                            .child(Input::new(&self.publisher)),
                                     ),
                             )
                             .child(
@@ -369,10 +390,20 @@ impl Render for BookFormView {
                                         ),
                                     )
                                     .child(
-                                        div()
-                                            .flex_1()
-                                            .min_w_0()
-                                            .child(Self::input_field("Formato", &self.format_type)),
+                                        field()
+                                            .label("Formato")
+                                            .required(false)
+                                            .description_fn({
+                                                let msg = self.errors.err_format_type.clone();
+                                                move |_, cx| {
+                                                    if msg.is_empty() {
+                                                        div()
+                                                    } else {
+                                                        div().text_color(cx.theme().danger).child(msg.clone())
+                                                    }
+                                                }
+                                            })
+                                            .child(Input::new(&self.format_type)),
                                     ),
                             )
                             .child(
@@ -380,16 +411,36 @@ impl Render for BookFormView {
                                     .w_full()
                                     .gap_4()
                                     .child(
-                                        div()
-                                            .flex_1()
-                                            .min_w_0()
-                                            .child(Self::input_field("Géneros", &self.genres)),
+                                        field()
+                                            .label("Géneros")
+                                            .required(false)
+                                            .description_fn({
+                                                let msg = self.errors.err_genres.clone();
+                                                move |_, cx| {
+                                                    if msg.is_empty() {
+                                                        div()
+                                                    } else {
+                                                        div().text_color(cx.theme().danger).child(msg.clone())
+                                                    }
+                                                }
+                                            })
+                                            .child(Input::new(&self.genres)),
                                     )
                                     .child(
-                                        div()
-                                            .flex_1()
-                                            .min_w_0()
-                                            .child(Self::input_field("Subjects / temas", &self.subjects)),
+                                        field()
+                                            .label("Subjects")
+                                            .required(false)
+                                            .description_fn({
+                                                let msg = self.errors.err_subjects.clone();
+                                                move |_, cx| {
+                                                    if msg.is_empty() {
+                                                        div()
+                                                    } else {
+                                                        div().text_color(cx.theme().danger).child(msg.clone())
+                                                    }
+                                                }
+                                            })
+                                            .child(Input::new(&self.subjects)),
                                     ),
                             )
                             .child(
@@ -412,36 +463,78 @@ impl Render for BookFormView {
                                     .w_full()
                                     .gap_4()
                                     .child(
-                                        div()
-                                            .flex_1()
-                                            .min_w_0()
-                                            .child(Self::input_field("Open Library ID", &self.open_library_id)),
+                                        field()
+                                            .label("Open Library ID")
+                                            .required(false)
+                                            .description_fn({
+                                                let msg = self.errors.err_open_library_id.clone();
+                                                move |_, cx| {
+                                                    if msg.is_empty() {
+                                                        div()
+                                                    } else {
+                                                        div().text_color(cx.theme().danger).child(msg.clone())
+                                                    }
+                                                }
+                                            })
+                                            .child(Input::new(&self.open_library_id)),
                                     )
-                                    .child(div().flex_1().min_w_0().child(Self::input_field("ISBN", &self.isbn))),
+                                    .child(
+                                        field()
+                                            .label("ISBN")
+                                            .required(false)
+                                            .description_fn({
+                                                let msg = self.errors.err_isbn.clone();
+                                                move |_, cx| {
+                                                    if msg.is_empty() {
+                                                        div()
+                                                    } else {
+                                                        div().text_color(cx.theme().danger).child(msg.clone())
+                                                    }
+                                                }
+                                            })
+                                            .child(Input::new(&self.isbn)),
+                                    ),
                             )
                             .child(
                                 h_flex()
                                     .w_full()
                                     .gap_4()
                                     .child(
-                                        div()
-                                            .flex_1()
-                                            .min_w_0()
-                                            .child(Self::input_field("URL de compra", &self.buy)),
+                                        field()
+                                            .label("URL de compra")
+                                            .required(false)
+                                            .description_fn({
+                                                let msg = self.errors.err_buy.clone();
+                                                move |_, cx| {
+                                                    if msg.is_empty() {
+                                                        div()
+                                                    } else {
+                                                        div().text_color(cx.theme().danger).child(msg.clone())
+                                                    }
+                                                }
+                                            })
+                                            .child(Input::new(&self.buy)),
                                     )
                                     .child(
-                                        div().flex_1().min_w_0().child(
-                                            field()
-                                                .label("Color de portada")
-                                                .required(false)
-                                                .child(Input::new(&self.cover_color))
-                                                .child(
-                                                    div()
-                                                        .text_xs()
-                                                        .text_color(rgb(0x85837D))
-                                                        .child("Por ahora hex, ej. 0xF4D5C2"),
-                                                ),
-                                        ),
+                                        field()
+                                            .label("Color de portada")
+                                            .required(false)
+                                            .description_fn({
+                                                let msg = self.errors.err_cover_color.clone();
+                                                move |_, cx| {
+                                                    if msg.is_empty() {
+                                                        div()
+                                                    } else {
+                                                        div().text_color(cx.theme().danger).child(msg.clone())
+                                                    }
+                                                }
+                                            })
+                                            .child(Input::new(&self.cover_color)), /*.child(
+                                                                                       div()
+                                                                                           .text_xs()
+                                                                                           .text_color(rgb(0x85837D))
+                                                                                           .child("Por ahora hex, ej. 0xF4D5C2"),
+                                                                                   ),*/
                                     ),
                             ),
                     )),
