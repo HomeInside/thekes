@@ -1,6 +1,7 @@
 use super::BookFormView;
 use crate::database::authors::model::AuthorModel;
 use crate::database::books::model::BooksModel;
+use gpui_kit::component::IndexPath;
 use gpui_kit::component::WindowExt;
 use gpui_kit::component::calendar::Date;
 use gpui_kit::component::notification::NotificationType;
@@ -56,12 +57,30 @@ impl BookFormView {
     }
 
     pub fn clean_fields(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        println!("clean_fields fn");
         self.title.update(cx, |state, cx| {
             state.set_value("", window, cx);
         });
+        self.lang.update(cx, |state, cx| state.set_value("", window, cx));
+        let default_index = Some(IndexPath::default().row(0));
+        self.author_id
+            .update(cx, |state, cx| state.set_selected_index(default_index, window, cx));
         self.synopsis.update(cx, |state, cx| {
             state.set_value("", window, cx);
         });
+        self.published_date.update(cx, |state, cx| {
+            state.set_date(chrono::Local::now().date_naive(), window, cx);
+        });
+        self.publisher.update(cx, |state, cx| state.set_value("", window, cx));
+        self.page_count.update(cx, |state, cx| state.set_value("1", window, cx));
+        self.format_type.update(cx, |state, cx| state.set_value("", window, cx));
+        self.genres.update(cx, |state, cx| state.set_value("", window, cx));
+        self.subjects.update(cx, |state, cx| state.set_value("", window, cx));
+        self.open_library_id
+            .update(cx, |state, cx| state.set_value("", window, cx));
+        self.isbn.update(cx, |state, cx| state.set_value("", window, cx));
+        self.buy.update(cx, |state, cx| state.set_value("", window, cx));
+        self.cover_color.update(cx, |state, cx| state.set_value("", window, cx));
 
         // limpiar la lista de errores
         self.errors = Default::default();
