@@ -84,12 +84,12 @@ impl MainWindow {
         cx.notify();
     }
 
-    pub fn handle_subs_books(&mut self, event: &BookViewEvent, _window: &mut Window, cx: &mut Context<Self>) {
+    pub fn handle_subs_books(&mut self, event: &BookViewEvent, window: &mut Window, cx: &mut Context<Self>) {
         match event {
             BookViewEvent::ShowForm => {
-                self.book_form.update(cx, |book_detail, _cx| {
+                self.book_form.update(cx, |book_detail, cx| {
                     println!("aqui limpia los campos del book showform");
-                    //book_detail.clean_fields(window, cx);
+                    book_detail.clean_fields(window, cx);
                 });
                 self.show_book_form = true;
                 self.show_books_details = false;
