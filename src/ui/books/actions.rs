@@ -49,9 +49,12 @@ impl Books {
         cx.notify();
     }
 
-    pub fn click_btn_new_book(&mut self, _cx: &mut Context<Self>) {
+    pub fn click_btn_new_book(&mut self, cx: &mut Context<Self>) {
         println!("click_btn_new_book fn");
+        println!("enviando evento BookViewEvent::ShowForm");
+        cx.emit(BookViewEvent::ShowForm);
     } //click_btn_new_book
+
     pub fn click_btn_search(&mut self, cx: &mut Context<Self>) {
         println!("click_btn_search fn");
         let text_search = self.input_search.read(cx).value().to_string();
