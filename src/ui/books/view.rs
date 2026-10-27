@@ -83,8 +83,7 @@ impl Render for Books {
                     .child(
                         Button::new("btn-add-book")
                             .primary()
-                            .icon(AssetIconName::Plus)
-                            .label("Nuevo libro")
+                            .label("Nuevo")
                             .on_click(cx.listener(|this, _, _, cx| this.click_btn_new_book(cx))),
                     ),
             )
