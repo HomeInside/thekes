@@ -64,10 +64,7 @@ impl MainWindow {
             }
             AuthorViewEvent::List => {
                 self.authors.update(cx, |authors, cx| {
-                    println!("================================");
-                    println!("AuthorViewEvent::List");
-                    println!("llamado a load_authors");
-                    println!("================================");
+                    println!("handle_subs AuthorViewEvent::List llamado a load_authors");
                     authors.load_authors(cx);
                 });
                 self.show_author_form = false;
@@ -77,7 +74,7 @@ impl MainWindow {
                 self.show_author_form = false;
                 self.show_author_details = true;
                 //2.
-                println!("handle_subs ShowDetails");
+                println!("handle_subs AuthorViewEvent::Details");
                 self.author_details.update(cx, |author_detail, cx| {
                     author_detail.make_author_data(info, cx);
                     author_detail.make_books_data(books, cx);
@@ -90,16 +87,16 @@ impl MainWindow {
     pub fn handle_subs_books(&mut self, event: &BookViewEvent, _window: &mut Window, cx: &mut Context<Self>) {
         match event {
             BookViewEvent::ShowForm => {
-                self.author_form.update(cx, |_author_detail, _cx| {
+                self.book_form.update(cx, |book_detail, _cx| {
                     println!("aqui limpia los campos del book showform");
-                    //author_detail.clean_fields(window, cx);
+                    //book_detail.clean_fields(window, cx);
                 });
                 self.show_book_form = true;
                 self.show_books_details = false;
             }
             BookViewEvent::List => {
-                self.authors.update(cx, |_authors, _cx| {
-                    println!("llamado a load_authors");
+                self.books.update(cx, |_authors, _cx| {
+                    println!("handle_subs_books BookViewEvent::List llamado a load_books");
                     //authors.load_books(cx);
                 });
                 self.show_book_form = false;
@@ -109,7 +106,7 @@ impl MainWindow {
                 self.show_book_form = false;
                 self.show_books_details = true;
                 //2.
-                println!("BookViewEvent::Details ShowDetails");
+                println!("handle_subs_books BookViewEvent::Details");
                 self.books_details.update(cx, |books_details, cx| {
                     println!("llamando a un evento de make_book_data, books_details");
                     books_details.make_book_data(info, cx);
