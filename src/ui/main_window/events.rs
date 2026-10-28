@@ -27,7 +27,7 @@ impl MainWindow {
             entity,
             window,
             move |this, _entity, event: &AuthorViewEvent, window, cx| {
-                println!("{source} event {:?}", event);
+                println!("subscribe_author {source} event {:?}", event);
                 this.handle_subs(event, window, cx);
             },
         )
@@ -45,7 +45,7 @@ impl MainWindow {
             entity,
             window,
             move |this, _entity, event: &BookViewEvent, window, cx| {
-                println!("{source} event {:?}", event);
+                println!("subscribe_books {source} event {:?}", event);
                 this.handle_subs_books(event, window, cx);
             },
         )
@@ -56,7 +56,6 @@ impl MainWindow {
         match event {
             AuthorViewEvent::ShowForm => {
                 self.author_form.update(cx, |author_detail, cx| {
-                    println!("aqui limpia los campos del showform");
                     author_detail.clean_fields(window, cx);
                 });
                 self.show_author_form = true;
@@ -64,7 +63,6 @@ impl MainWindow {
             }
             AuthorViewEvent::List => {
                 self.authors.update(cx, |authors, cx| {
-                    println!("handle_subs AuthorViewEvent::List llamando a load_authors");
                     authors.load_authors(cx);
                 });
                 self.show_author_form = false;
@@ -73,8 +71,6 @@ impl MainWindow {
             AuthorViewEvent::Details { info, books } => {
                 self.show_author_form = false;
                 self.show_author_details = true;
-                //2.
-                println!("handle_subs AuthorViewEvent::Details");
                 self.author_details.update(cx, |author_detail, cx| {
                     author_detail.make_author_data(info, cx);
                     author_detail.make_books_data(books, cx);
@@ -88,15 +84,13 @@ impl MainWindow {
         match event {
             BookViewEvent::ShowForm => {
                 self.book_form.update(cx, |book_detail, cx| {
-                    println!("aqui limpia los campos del book showform");
                     book_detail.clean_fields(window, cx);
                 });
                 self.show_book_form = true;
                 self.show_books_details = false;
             }
             BookViewEvent::List => {
-                self.books.update(cx, |books, _cx| {
-                    println!("handle_subs_books BookViewEvent::List llamando a load_books");
+                self.books.update(cx, |books, cx| {
                     books.load_books(cx);
                 });
                 self.show_book_form = false;
@@ -105,10 +99,7 @@ impl MainWindow {
             BookViewEvent::Details { info } => {
                 self.show_book_form = false;
                 self.show_books_details = true;
-                //2.
-                println!("handle_subs_books BookViewEvent::Details");
                 self.books_details.update(cx, |books_details, cx| {
-                    println!("llamando a un evento de make_book_data, books_details");
                     books_details.make_book_data(info, cx);
                 });
             }
