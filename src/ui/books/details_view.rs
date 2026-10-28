@@ -34,7 +34,6 @@ pub struct BookDetailModel {
     pub(crate) publisher: String,
     pub(crate) subjects: Option<String>,
     pub(crate) ol_id: Option<String>,
-    pub(crate) viaf_id: Option<String>,
     pub(crate) isbn: Option<String>,
     pub(crate) buy: Option<String>,
     pub(crate) created_at: String,
@@ -61,7 +60,7 @@ impl BookDetailsView {
         }
     }
 
-    //
+    /// crea las secciones principales de la ui, cada card
     fn section(
         title: &'static str,
         description: &'static str,
@@ -103,7 +102,7 @@ impl BookDetailsView {
             .child(content)
     }
 
-    //
+    /// links para buy
     fn meta_link(id: &'static str, value: Option<String>) -> impl IntoElement {
         h_flex()
             .w_full()
@@ -139,7 +138,7 @@ impl BookDetailsView {
             })
     }
 
-    //
+    /// crea la ui estilo tabla con clave/valor para info del libro
     fn kv_row(label: &'static str, value: String) -> impl IntoElement {
         h_flex()
             .w_full()
@@ -159,7 +158,8 @@ impl BookDetailsView {
                     .child(value),
             )
     }
-    //
+
+    /// links para ol_id e isbn
     fn ref_link(
         id: &'static str,
         label: &'static str,
@@ -204,7 +204,8 @@ impl BookDetailsView {
                     .into_any_element(),
             })
     }
-    //
+
+    /// tags para genres y subjects
     fn make_tags(&self, tag_str: Option<String>) -> impl IntoElement {
         let items: Vec<String> = if let Some(data) = tag_str {
             data.split(',')
@@ -270,6 +271,7 @@ impl BookDetailsView {
         }
     }
 
+    /// convierte la info de BooksModel en BookDetailModel
     pub fn make_book_data(&mut self, book: &BooksModel, cx: &mut Context<Self>) {
         self.book_detail.id = book.id;
         self.book_detail.title = book.title.clone();
@@ -288,7 +290,6 @@ impl BookDetailsView {
         self.book_detail.genres = book.genres.clone();
         //
         self.book_detail.ol_id = book.open_library_id.clone();
-        self.book_detail.viaf_id = None; //"No disponible".into();
         self.book_detail.isbn = book.isbn.clone();
         //self.book_detail.buy = None; //"No existe enlace de compra".into();
         self.book_detail.buy = book.buy.clone();
@@ -321,12 +322,10 @@ impl Render for BookDetailsView {
                                     .font_weight(FontWeight::SEMIBOLD)
                                     .child("Detalle del libro"),
                             )
-                            .child(
-                                div()
-                                    .text_sm()
-                                    .text_color(self.color_config.muted)
-                                    .child("Información del libro agregado"),
-                            ),
+                            .child(div().text_sm().text_color(self.color_config.muted).child(format!(
+                                "{} by {}",
+                                self.book_detail.title, self.book_detail.author_names
+                            ))),
                     )
                     .child(
                         Button::new("btn-book-details-back")
