@@ -59,7 +59,7 @@ pub fn delete_book(conn: &Connection, id: i32) -> Result<usize> {
 
 pub fn search_book_by_id(conn: &Connection, item_id: i32) -> Result<Option<BooksModel>> {
     conn.query_row(
-        "SELECT id,title,author_id,synopsis,lang,page_count,format_type,genres,published_date,publisher,open_library_id,isbn,buy,cover_color,created_at FROM books
+        "SELECT id,title,author_id,synopsis,lang,page_count,format_type,genres,subjects,published_date,publisher,open_library_id,isbn,buy,cover_color,created_at FROM books
          WHERE id = ?1",
         params![item_id],
         |row| {
@@ -73,7 +73,7 @@ pub fn search_book_by_id(conn: &Connection, item_id: i32) -> Result<Option<Books
                 page_count: row.get("page_count")?,
                 format_type: row.get("format_type")?,
                 genres: row.get("genres")?,
-                //subjects: row.get("subjects")?,
+                subjects: row.get("subjects")?,
                 published_date:row.get("published_date")?,
                 publisher: row.get("publisher")?,
                 open_library_id: row.get("open_library_id")?,
