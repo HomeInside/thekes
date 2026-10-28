@@ -13,11 +13,7 @@ impl BookFormView {
         match self.validate_and_submit(window, cx) {
             Some(book) => {
                 println!("aqui guardar en la db");
-                window.push_notification((NotificationType::Success, "Libro guardado con exito"), cx);
-                self.clean_fields(window, cx);
-                //TODO
-                /*
-                 match self.book_service.create_book(&book) {
+                match self.book_service.create_book(&book) {
                     Ok(result) => {
                         println!("Libro guardado con Id: {}", result);
                         window.push_notification((NotificationType::Success, "Libro guardado con exito"), cx);
@@ -28,7 +24,6 @@ impl BookFormView {
                         window.push_notification((NotificationType::Error, "Error al guardar el Libro"), cx);
                     }
                 }
-                */
             }
             None => println!("YUKAS! guardar en la db"),
         };
@@ -210,7 +205,7 @@ impl BookFormView {
                 format_type,
                 genres: Some(genres),
                 subjects: Some(subjects),
-                //published_date: i32,
+                published_date: published_date_opt.unwrap_or_default().to_string(),
                 publisher: Some(publisher),
                 open_library_id: Some(open_library_id),
                 isbn: Some(isbn),
