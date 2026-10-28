@@ -13,7 +13,7 @@ pub struct BooksModel {
     pub genres: Option<String>,
     // revisar este campo
     pub subjects: Option<String>,
-    pub published_date: i32,
+    pub published_date: String,
     pub publisher: Option<String>,
     pub open_library_id: Option<String>,
     pub isbn: Option<String>,

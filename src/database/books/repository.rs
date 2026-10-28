@@ -110,9 +110,24 @@ pub fn search_one_book(conn: &Connection, title: String) -> Result<Vec<BooksMode
 #[allow(dead_code)]
 pub fn add_book(conn: &Connection, book: &BooksModel) -> Result<usize, Error> {
     let mut stmt = conn.prepare(
-        "INSERT INTO books (title, author_id, published_date, isbn) VALUES(:title, :author_id, :published_date, :isbn)",
+        "INSERT INTO books(title,author_id,synopsis,lang,page_count,format_type,genres,subjects,published_date,publisher,open_library_id,isbn,buy,cover_color) VALUES(:title,:author_id,:synopsis,:lang,:page_count,:format_type,:genres,:subjects,:published_date,:publisher,:open_library_id,:isbn,:buy,:cover_color)",
     )?;
-    stmt.execute(params![book.title, book.author_id, book.published_date, book.isbn])?;
+    stmt.execute(params![
+        book.title,
+        book.author_id,
+        book.synopsis,
+        book.lang,
+        book.page_count,
+        book.format_type,
+        book.genres,
+        book.subjects,
+        book.published_date,
+        book.publisher,
+        book.open_library_id,
+        book.isbn,
+        book.buy,
+        book.cover_color
+    ])?;
 
     let last_row_id = conn.last_insert_rowid() as usize;
     //
