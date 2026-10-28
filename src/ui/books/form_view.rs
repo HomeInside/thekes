@@ -122,7 +122,7 @@ impl BookFormView {
             published_date,
             publisher: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. A. L. Burt Company")),
             open_library_id: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. OL47078012M")),
-            isbn: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. 978-...")),
+            isbn: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. 97896...")),
             buy: cx.new(|cx| InputState::new(window, cx).placeholder("https://my-fav-store.example")),
             cover_color: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. 0xF4D5C2")),
             author_service,
