@@ -101,6 +101,7 @@ impl MainWindow {
                 self.show_book_form = false;
                 self.show_books_details = true;
                 self.books_details.update(cx, |books_details, cx| {
+                    books_details.get_author_data(info.author_id, window, cx);
                     books_details.make_book_data(info, cx);
                 });
             }
