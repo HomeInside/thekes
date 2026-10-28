@@ -52,7 +52,7 @@ pub struct BookFormView {
     pub(crate) format_type: Entity<InputState>,
     pub(crate) genres: Entity<InputState>,
     pub(crate) subjects: Entity<InputState>,
-    pub(crate) published_date: Entity<DatePickerState>,
+    pub(crate) published_date: Entity<InputState>,
     pub(crate) publisher: Entity<InputState>,
     pub(crate) open_library_id: Entity<InputState>,
     pub(crate) isbn: Entity<InputState>,
@@ -72,22 +72,11 @@ impl BookFormView {
         let current_date = chrono::Local::now();
 
         let published_date = cx.new(|cx| {
-            let current_year = current_date.year();
-            let current_month = current_date.month();
-            let current_day = current_date.day();
-            let min_year = 0; // año 0 d.C.
-
-            // 0000-01-01
-            let min_date = NaiveDate::from_ymd_opt(min_year, 1, 1).unwrap();
-            // hoy
-            let max_date = NaiveDate::from_ymd_opt(current_year, current_month, current_day).unwrap();
-
-            let mut picker = DatePickerState::new(window, cx)
-                .date_format("%Y-%m-%d")
-                .disabled_matcher(calendar::Matcher::custom(move |d| *d < min_date || *d > max_date));
-
-            picker.set_year_range((min_year, current_year + 1), cx);
-            picker
+            InputState::new(window, cx)
+                .placeholder("Ej.1902")
+                .min(1.)
+                .max(current_date.year().into())
+                .default_value("1")
         });
 
         //let author_list: Vec<String> = if let Some(list) = authors { list } else { vec![] };
@@ -344,11 +333,7 @@ impl Render for BookFormView {
                                                     }
                                                 }
                                             })
-                                            .child(
-                                                DatePicker::new(&self.published_date)
-                                                    .placeholder("Select a date...")
-                                                    .cleanable(true),
-                                            ),
+                                            .child(NumberInput::new(&self.published_date)),
                                     )
                                     .child(
                                         field()

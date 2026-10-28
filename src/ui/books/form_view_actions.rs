@@ -1,12 +1,12 @@
 use super::BookFormView;
 use crate::database::authors::model::AuthorModel;
 use crate::database::books::model::BooksModel;
+use chrono::Datelike;
 use gpui_kit::component::IndexPath;
 use gpui_kit::component::WindowExt;
 use gpui_kit::component::calendar::Date;
 use gpui_kit::component::notification::NotificationType;
 use gpui_kit::{Context, Window};
-
 impl BookFormView {
     pub fn click_btn_form_save(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         println!("click_btn_form_save fn");
@@ -47,10 +47,7 @@ impl BookFormView {
             .unwrap_or_default();
         let lang = self.lang.read(cx).value().to_string();
         let synopsis = self.synopsis.read(cx).value().to_string();
-        let published_date_opt: Option<chrono::NaiveDate> = match self.published_date.read(cx).date() {
-            Date::Single(Some(pd)) => Some(pd),
-            _ => None,
-        };
+        let published_date = self.published_date.read(cx).value();
         let publisher = self.publisher.read(cx).value().to_string();
         let page_count = self.page_count.read(cx).value();
         let format_type = self.format_type.read(cx).value().to_string();
@@ -86,13 +83,24 @@ impl BookFormView {
         } else {
             String::new()
         };
-        self.errors.err_published_date = match published_date_opt {
-            None => "Selecciona una fecha.".into(),
-            Some(d) if d > today => "La fecha debe ser anterior a la actual(hoy).".into(),
-            Some(_) => String::new(),
+        let mut publishe_date_year = 0;
+        match published_date.parse::<u32>() {
+            Ok(value) => {
+                // TODO guardar el valor
+                println!("aqui el valor: {}", value);
+                if value < 1 || value > today.year() as u32 {
+                    self.errors.err_published_date =
+                        "el año de publicación debe estar entre 1 y el año actual".to_string();
+                } else {
+                    self.errors.err_published_date = String::new();
+                    publishe_date_year = value;
+                }
+            }
+            Err(error) => {
+                println!("error al convertir el valor de published_date: {}", error);
+                self.errors.err_published_date = "el año de publicación debe estar entre 1 y el año actual".to_string();
+            }
         };
-        // al momento de guardar
-        //book.published_date = published_date_opt.unwrap_or_default().to_string();
         //
         self.errors.err_publisher = if publisher.is_empty() {
             String::new()
@@ -205,7 +213,7 @@ impl BookFormView {
                 format_type,
                 genres: Some(genres),
                 subjects: Some(subjects),
-                published_date: published_date_opt.unwrap_or_default().to_string(),
+                published_date: publishe_date_year.to_string(),
                 publisher: Some(publisher),
                 open_library_id: Some(open_library_id),
                 isbn: Some(isbn),
@@ -243,7 +251,9 @@ impl BookFormView {
             state.set_value("", window, cx);
         });
         self.published_date.update(cx, |state, cx| {
-            state.set_date(chrono::Local::now().date_naive(), window, cx);
+            let current_date = chrono::Local::now();
+            let current_year = current_date.year();
+            state.set_value(current_year.to_string(), window, cx);
         });
         self.publisher.update(cx, |state, cx| state.set_value("", window, cx));
         self.page_count.update(cx, |state, cx| state.set_value("1", window, cx));
