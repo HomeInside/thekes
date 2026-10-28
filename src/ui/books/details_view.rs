@@ -3,7 +3,6 @@ use crate::database::DatabaseService;
 use crate::database::authors::model::AuthorModel;
 use crate::database::authors::service::AuthorService;
 use crate::database::books::model::BooksModel;
-use crate::ui::authors;
 use crate::ui::main_window::ColorConfig;
 use crate::utils::date_utils;
 use gpui_kit::IntoElement;
@@ -12,7 +11,7 @@ use gpui_kit::component::WindowExt;
 use gpui_kit::component::button::{Button, ButtonVariants};
 use gpui_kit::component::notification::NotificationType;
 use gpui_kit::component::scroll::ScrollableElement;
-use gpui_kit::component::{Icon, IconName, form};
+use gpui_kit::component::{Icon, IconName};
 use gpui_kit::component::{h_flex, v_flex};
 use gpui_kit::*;
 use gpui_kit::{Context, Render, Styled, Window};
@@ -272,7 +271,7 @@ impl BookDetailsView {
     }
 
     /// convierte la info de BooksModel en BookDetailModel
-    pub fn make_book_data(&mut self, book: &BooksModel, cx: &mut Context<Self>) {
+    pub fn make_book_data(&mut self, book: &BooksModel, _cx: &mut Context<Self>) {
         self.book_detail.id = book.id;
         self.book_detail.title = book.title.clone();
         // author_names en `get_author_data`
