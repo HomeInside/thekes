@@ -32,6 +32,26 @@ pub fn all_authors(conn: &Connection) -> Result<Vec<AuthorModel>, Error> {
     Ok(result)
 }
 
+pub fn title_authors(conn: &Connection) -> Result<Vec<AuthorModel>, Error> {
+    let mut stmt = conn.prepare("SELECT id, name, last_name FROM authors")?;
+
+    let authors_list = stmt.query_map([], |row| {
+        Ok(AuthorModel {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            last_name: row.get(2)?,
+            ..Default::default()
+        })
+    })?;
+
+    let mut result: Vec<AuthorModel> = Vec::new();
+
+    for author in authors_list {
+        result.push(author.unwrap());
+    }
+
+    Ok(result)
+}
 #[allow(dead_code)]
 pub fn delete_author(conn: &Connection, id: i32) -> Result<usize> {
     println!("delete_author fn: {}", id);
