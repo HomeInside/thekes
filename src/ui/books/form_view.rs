@@ -45,7 +45,7 @@ pub struct FormBookErrors {
 pub struct BookFormView {
     pub(crate) color_config: ColorConfig,
     pub(crate) title: Entity<InputState>,
-    pub(crate) author_id: Entity<SelectState<SearchableVec<String>>>,
+    pub(crate) author_list_id: Entity<SelectState<SearchableVec<String>>>,
     pub(crate) synopsis: Entity<TextareaState>,
     pub(crate) lang: Entity<InputState>,
     pub(crate) page_count: Entity<InputState>,
@@ -80,7 +80,7 @@ impl BookFormView {
         });
 
         //let author_list: Vec<String> = if let Some(list) = authors { list } else { vec![] };
-        let author_list: Vec<String> = vec!["Select author".into(), "Arthur".into(), "Conan".into(), "Doyle".into()];
+        let author_list: Vec<String> = vec!["-".into()];
 
         // si estamos editando y `author_id` existe
         /*
@@ -95,7 +95,9 @@ impl BookFormView {
         Self {
             color_config: ColorConfig::default(),
             title: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. The Adventures of Sherlock Holmes")),
-            author_id: cx.new(|cx| SelectState::new(SearchableVec::new(author_list), default_index, window, cx)),
+            author_list_id: cx.new(|cx| {
+                SelectState::new(SearchableVec::new(author_list), default_index, window, cx).searchable(true)
+            }),
             synopsis: cx.new(|cx| TextareaState::new(window, cx).rows(4).placeholder("Synopsis...")),
             lang: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. English, Spanish")),
             page_count: cx.new(|cx| {
@@ -267,7 +269,11 @@ impl Render for BookFormView {
                                                         }
                                                     }
                                                 })
-                                                .child(Select::new(&self.author_id).placeholder("Autores")),
+                                                .child(
+                                                    Select::new(&self.author_list_id)
+                                                        .placeholder("Autores")
+                                                        .cleanable(true),
+                                                ),
                                         ),
                                     )
                                     .child(
