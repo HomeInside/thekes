@@ -32,7 +32,7 @@ pub fn init_db(conn: &Connection) -> Result<(), Box<dyn Error>> {
         format_type TEXT NOT NULL,
         genres TEXT NULL,
         subjects TEXT NULL,
-        published_date INTEGER NULL,
+        published_date TEXT NULL,
         publisher TEXT NULL,
         open_library_id TEXT NULL,
         isbn TEXT NULL,

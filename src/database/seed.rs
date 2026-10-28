@@ -49,7 +49,7 @@ pub fn add_default_author(conn: &Connection) -> Result<(), Box<dyn Error>> {
             307,
             "physical_book",
             Some("classic literature, mistery, crime & mystery fiction"),
-            1920,
+            "1920",
             "A. L. Burt Company, Publishers",
             "OL262421W",
             "https://www.amazon.com/s?k=The+Adventures+of+Sherlock+Holmes+Arthur+Conan+Doyle&i=stripbooks",
