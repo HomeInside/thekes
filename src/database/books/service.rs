@@ -4,18 +4,6 @@ use crate::database::service::DatabaseService;
 use rusqlite::Result;
 use std::sync::Arc;
 
-/*
-#[derive(Clone)]
-pub struct BookService {
-    db: DatabaseService,
-}
-
-impl BookService {
-    pub fn new(db: DatabaseService) -> Self {
-        Self { db }
-    }
-*/
-
 #[derive(Clone)]
 pub struct BookService {
     db: Arc<DatabaseService>,

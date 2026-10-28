@@ -64,7 +64,7 @@ impl MainWindow {
             }
             AuthorViewEvent::List => {
                 self.authors.update(cx, |authors, cx| {
-                    println!("handle_subs AuthorViewEvent::List llamado a load_authors");
+                    println!("handle_subs AuthorViewEvent::List llamando a load_authors");
                     authors.load_authors(cx);
                 });
                 self.show_author_form = false;
@@ -95,9 +95,9 @@ impl MainWindow {
                 self.show_books_details = false;
             }
             BookViewEvent::List => {
-                self.books.update(cx, |_authors, _cx| {
-                    println!("handle_subs_books BookViewEvent::List llamado a load_books");
-                    //authors.load_books(cx);
+                self.books.update(cx, |books, _cx| {
+                    println!("handle_subs_books BookViewEvent::List llamando a load_books");
+                    books.load_books(cx);
                 });
                 self.show_book_form = false;
                 self.show_books_details = false;
