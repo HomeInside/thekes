@@ -3,11 +3,10 @@ use crate::database::DatabaseService;
 use crate::database::authors::service::AuthorService;
 use crate::database::books::service::BookService;
 use crate::ui::main_window::ColorConfig;
-use chrono::{Datelike, NaiveDate};
+use chrono::Datelike;
 use gpui_kit::IntoElement;
 use gpui_kit::component::ActiveTheme;
 use gpui_kit::component::IndexPath;
-use gpui_kit::component::Sizable;
 use gpui_kit::component::button::{Button, ButtonVariants};
 use gpui_kit::component::form::field;
 use gpui_kit::component::input::NumberInput;
@@ -15,11 +14,6 @@ use gpui_kit::component::input::{Input, InputState, Textarea, TextareaState};
 use gpui_kit::component::scroll::ScrollableElement;
 use gpui_kit::component::select::{SearchableVec, Select, SelectState};
 use gpui_kit::component::{Icon, IconName, h_flex, v_flex};
-use gpui_kit::component::{
-    calendar::{self},
-    date_picker::{DatePicker, DatePickerState, DateRangePreset},
-};
-use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::*;
 use gpui_kit::{Context, Entity, Render, Styled, Window};
 use std::sync::Arc;

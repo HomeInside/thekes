@@ -1,10 +1,8 @@
 use super::BookFormView;
-use crate::database::authors::model::AuthorModel;
 use crate::database::books::model::BooksModel;
 use chrono::Datelike;
 use gpui_kit::component::IndexPath;
 use gpui_kit::component::WindowExt;
-use gpui_kit::component::calendar::Date;
 use gpui_kit::component::notification::NotificationType;
 use gpui_kit::{Context, Window};
 impl BookFormView {
@@ -64,9 +62,7 @@ impl BookFormView {
             .author_list_id
             .read(cx)
             .selected_index(cx)
-            .map(|id| {
-                id.row as i32
-            })
+            .map(|id| id.row as i32)
             .unwrap_or_default();
 
         let lang = self.lang.read(cx).value().to_string();
