@@ -3,13 +3,16 @@ use crate::database::DatabaseService;
 use crate::database::authors::model::AuthorModel;
 use crate::database::authors::service::AuthorService;
 use crate::database::books::model::BooksModel;
+use crate::ui::authors;
 use crate::ui::main_window::ColorConfig;
 use crate::utils::date_utils;
 use gpui_kit::IntoElement;
 use gpui_kit::base::Link;
+use gpui_kit::component::WindowExt;
 use gpui_kit::component::button::{Button, ButtonVariants};
+use gpui_kit::component::notification::NotificationType;
 use gpui_kit::component::scroll::ScrollableElement;
-use gpui_kit::component::{Icon, IconName};
+use gpui_kit::component::{Icon, IconName, form};
 use gpui_kit::component::{h_flex, v_flex};
 use gpui_kit::*;
 use gpui_kit::{Context, Render, Styled, Window};
@@ -26,10 +29,10 @@ pub struct BookDetailModel {
     pub(crate) cover_color: u32,
     pub(crate) page_count: String,
     pub(crate) format_type: String,
-    pub(crate) genres: String,
+    pub(crate) genres: Option<String>,
     pub(crate) published_date: String,
     pub(crate) publisher: String,
-    pub(crate) subjects: String,
+    pub(crate) subjects: Option<String>,
     pub(crate) ol_id: Option<String>,
     pub(crate) viaf_id: Option<String>,
     pub(crate) isbn: Option<String>,
@@ -202,13 +205,15 @@ impl BookDetailsView {
             })
     }
     //
-    fn make_tags(&self, raw: String) -> impl IntoElement {
-        let items: Vec<String> = raw
-            .split(',')
-            .map(|g| g.trim().to_string())
-            .filter(|g| !g.is_empty())
-            .collect();
-
+    fn make_tags(&self, tag_str: Option<String>) -> impl IntoElement {
+        let items: Vec<String> = if let Some(data) = tag_str {
+            data.split(',')
+                .map(|g| g.trim().to_string())
+                .filter(|g| !g.is_empty())
+                .collect()
+        } else {
+            vec![]
+        };
         if items.is_empty() {
             return h_flex()
                 .flex_wrap()
@@ -241,12 +246,34 @@ impl BookDetailsView {
             }))
             .into_any_element()
     }
-    //
 
-    pub fn make_book_data(&mut self, book: &BooksModel, _cx: &mut Context<Self>) {
+    /// obtener el nombre del autor
+    pub fn get_author_data(&mut self, author_id: i32, window: &mut Window, cx: &mut Context<Self>) {
+        println!("get_author_data fn",);
+        match self.author_detail_service.get_one(author_id) {
+            //TO CHECK
+            Ok(Some(author)) => {
+                self.book_detail.author_names = format!("{} {}", author.name, author.last_name);
+            }
+            Ok(None) => {
+                let msg = format!("no se encontró el autor con ID: {}", author_id);
+                eprintln!("{}", msg);
+
+                window.push_notification((NotificationType::Warning, msg), cx);
+            }
+            Err(error) => {
+                let msg = format!("Ocurrió un error, al consultar por Id de autor: {}", error);
+                eprintln!("{}", msg);
+
+                window.push_notification((NotificationType::Error, msg), cx);
+            }
+        }
+    }
+
+    pub fn make_book_data(&mut self, book: &BooksModel, cx: &mut Context<Self>) {
         self.book_detail.id = book.id;
         self.book_detail.title = book.title.clone();
-        self.book_detail.author_names = "- Los nombres del autor aquí -".into();
+        // author_names en `get_author_data`
         self.book_detail.author_id = book.author_id.clone().to_string();
         self.book_detail.synopsis = book.synopsis.clone();
         self.book_detail.cover_color = book.cover_color.clone().unwrap_or(0x000000);
@@ -257,7 +284,8 @@ impl BookDetailsView {
         self.book_detail.page_count = book.page_count.clone().to_string();
         self.book_detail.lang = book.lang.clone();
         //
-        self.book_detail.subjects = book.subjects.clone().unwrap_or("no definido".into());
+        self.book_detail.subjects = book.subjects.clone();
+        self.book_detail.genres = book.genres.clone();
         //
         self.book_detail.ol_id = book.open_library_id.clone();
         self.book_detail.viaf_id = None; //"No disponible".into();
@@ -452,12 +480,7 @@ impl Render for BookDetailsView {
                                             .child("Géneros literarios"),
                                     )
                                     .child(self.make_tags(self.book_detail.genres.clone()))
-                                    .child(
-                                        div()
-                                            .text_sm()
-                                            .font_weight(FontWeight::MEDIUM)
-                                            .child("Temas / subjects"),
-                                    )
+                                    .child(div().text_sm().font_weight(FontWeight::MEDIUM).child("Temas"))
                                     //
                                     // TODO
                                     .child(self.make_tags(self.book_detail.subjects.clone())),
