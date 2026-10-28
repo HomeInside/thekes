@@ -8,6 +8,30 @@ use gpui_kit::component::calendar::Date;
 use gpui_kit::component::notification::NotificationType;
 use gpui_kit::{Context, Window};
 impl BookFormView {
+    pub fn get_list_authors(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        println!("get_list_authors fn");
+        match self.author_service.list_authors() {
+            Ok(result) => {
+                println!("lista de autores: {:?}", result);
+                let mut new_items = vec!["Select an author".into()];
+
+                new_items.extend(
+                    result
+                        .into_iter()
+                        .map(|item| format!("{}. {}, {}", item.id, item.last_name, item.name)),
+                );
+                self.author_list_id.update(cx, |state, cx| {
+                    state.set_items(new_items.into(), window, cx);
+                });
+            }
+            Err(error) => {
+                eprintln!("Error al consultar la lista de autores: {error}");
+                window.push_notification((NotificationType::Error, "Error al consultar la lista de autores"), cx);
+            }
+        }
+        cx.notify();
+    }
+
     pub fn click_btn_form_save(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         println!("click_btn_form_save fn");
         match self.validate_and_submit(window, cx) {
@@ -37,14 +61,14 @@ impl BookFormView {
 
         let title = self.title.read(cx).value().to_string();
         let author_id = self
-            .author_id
+            .author_list_id
             .read(cx)
             .selected_index(cx)
             .map(|id| {
-                // los id del select comienzan en 0
-                (id.row + 1) as i32
+                id.row as i32
             })
             .unwrap_or_default();
+
         let lang = self.lang.read(cx).value().to_string();
         let synopsis = self.synopsis.read(cx).value().to_string();
         let published_date = self.published_date.read(cx).value();
@@ -61,6 +85,13 @@ impl BookFormView {
         //
         // TODO validacion START
         //
+        println!("Seleccionado author_id: {}", author_id);
+        if author_id < 1 {
+            self.errors.err_author_id = "Selecciona un autor de la lista".to_string();
+        } else {
+            self.errors.err_author_id = String::new();
+        }
+
         let title = title.trim();
         self.errors.err_title = if title.is_empty() {
             "Se necesita un título para el libro".into()
@@ -245,7 +276,7 @@ impl BookFormView {
         });
         self.lang.update(cx, |state, cx| state.set_value("", window, cx));
         let default_index = Some(IndexPath::default().row(0));
-        self.author_id
+        self.author_list_id
             .update(cx, |state, cx| state.set_selected_index(default_index, window, cx));
         self.synopsis.update(cx, |state, cx| {
             state.set_value("", window, cx);

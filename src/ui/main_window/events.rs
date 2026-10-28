@@ -85,6 +85,7 @@ impl MainWindow {
             BookViewEvent::ShowForm => {
                 self.book_form.update(cx, |book_detail, cx| {
                     book_detail.clean_fields(window, cx);
+                    book_detail.get_list_authors(window, cx);
                 });
                 self.show_book_form = true;
                 self.show_books_details = false;
