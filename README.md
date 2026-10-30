@@ -59,6 +59,9 @@ Pre-built binaries for Gnu/Linux, and Windows can be found on the [releases page
 ## Thanks To:
 
 - [GPUi-Kit](https://gpui-kit.com/)
+- [BookOrbit](https://bookorbit.app/)
+- [Panda Reader](https://github.com/yuhangch/panda-reader)
+- [RustGrid](https://github.com/yisier/rustgrid)
 
 
 ## License
