@@ -3,7 +3,14 @@ use std::{fs, io, path::PathBuf};
 
 pub fn app_path() -> io::Result<PathBuf> {
     // en Windows: C:\Users\USERNAME\AppData\Local\Thekes\data
-    match ProjectDirs::from("com", "Thekes", "") {
+    #[cfg(target_os = "windows")]
+    let dirs = ProjectDirs::from("com", "Thekes", "");
+
+    // en Linux: /home/USERNAME/.local/share/thekes/"
+    #[cfg(target_os = "linux")]
+    let dirs = ProjectDirs::from("com", "Thekes", "Thekes");
+
+    match dirs {
         Some(dirs) => Ok(dirs.data_local_dir().to_path_buf()),
         None => Ok(std::env::current_dir()?.join("data")),
     }
