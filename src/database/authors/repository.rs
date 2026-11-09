@@ -141,3 +141,27 @@ pub fn edit_authors(conn: &Connection, item_id: i32, author: &AuthorModel) -> Re
 
     Ok(rows)
 }
+
+/// consulta los autores por nombres y/o apellidos usando Like
+pub fn search_author_by_names(conn: &Connection, search: &str) -> Result<Vec<AuthorModel>, Error> {
+    let mut stmt = conn.prepare("SELECT id, name, last_name, birth_place, date_of_birth, date_of_death, genres, biography, writing_lang, cover_color FROM authors WHERE lower(name) LIKE lower(:search) OR lower(last_name) LIKE lower(:search);")?;
+    let q_like = format!("%{}%", search.trim().to_lowercase());
+
+    let authors_list = stmt.query_map(&[(":search", &q_like)], |row| {
+        Ok(AuthorModel {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            last_name: row.get(2)?,
+            birth_place: row.get(3)?,
+            date_of_birth: row.get(4)?,
+            date_of_death: row.get(5)?,
+            genres: row.get(6)?,
+            biography: row.get(7)?,
+            writing_lang: row.get(8)?,
+            cover_color: row.get(9)?,
+            ..Default::default()
+        })
+    })?;
+
+    authors_list.collect()
+}

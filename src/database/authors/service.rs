@@ -62,4 +62,10 @@ impl AuthorService {
 
         repository::delete_author(&conn, item_id)
     }
+
+    pub fn search_by_name(&self, search: &str) -> Result<Vec<AuthorModel>> {
+        let conn = self.db.get_conn().lock().map_err(|_| rusqlite::Error::InvalidQuery)?;
+
+        repository::search_author_by_names(&conn, search)
+    }
 }
