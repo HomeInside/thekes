@@ -181,9 +181,9 @@ impl Render for MainWindow {
 impl MainWindow {
     pub fn new(window: &mut Window, cx: &mut Context<Self>, db_conn: Arc<DatabaseService>) -> Self {
         let sidebar = cx.new(|_| AppSidebar::new());
-        let dashboard = cx.new(|_| Dashboard::new());
         //
         // cada modulo gestiona la conexión a la DB
+        let dashboard = cx.new(|cx| Dashboard::new(window, cx, db_conn.clone()));
         //
         let books = cx.new(|cx| Books::new(window, cx, db_conn.clone()));
         let book_form = cx.new(|cx| BookFormView::new(window, cx, db_conn.clone()));
@@ -209,7 +209,11 @@ impl MainWindow {
             println!("llegó desde NavigateTo: {:?}", event.module);
             // TO FIX validar y mejorar esta parte
             // cargar los datos de autor
-            if event.module == ActiveModule::Authors {
+            if event.module == ActiveModule::Dashboard {
+                this.dashboard.update(cx, |dash, cx| {
+                    dash.load_stats(cx);
+                });
+            } else if event.module == ActiveModule::Authors {
                 this.authors.update(cx, |authors, cx| {
                     authors.load_authors(cx);
                 });
@@ -222,6 +226,11 @@ impl MainWindow {
 
             this.active_module = event.module;
             cx.notify();
+        });
+
+        // load stats al inicio
+        dashboard.update(cx, |dash, cx| {
+            dash.load_stats(cx);
         });
 
         Self {
