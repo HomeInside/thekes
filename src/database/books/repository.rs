@@ -89,10 +89,13 @@ pub fn search_book_by_id(conn: &Connection, item_id: i32) -> Result<Option<Books
 }
 
 #[allow(dead_code)]
-pub fn search_one_book(conn: &Connection, title: String) -> Result<Vec<BooksModel>, Error> {
+/// consulta los libros por nombres usando Like
+pub fn search_one_book(conn: &Connection, title: &str) -> Result<Vec<BooksModel>, Error> {
     println!("search_one_book fn: {}", title);
-    let mut stmt = conn.prepare("SELECT * FROM books WHERE title LIKE :title")?;
-    let sql = format!("%{}%", title);
+    let mut stmt = conn.prepare(
+        "SELECT id, title, author_id, published_date, open_library_id, isbn, buy FROM books WHERE title LIKE :title",
+    )?;
+    let sql = format!("%{}%", title.trim().to_lowercase());
 
     let rows = stmt.query_map(&[(":title", &sql)], |row| {
         Ok(BooksModel {
@@ -100,10 +103,13 @@ pub fn search_one_book(conn: &Connection, title: String) -> Result<Vec<BooksMode
             title: row.get(1)?,
             author_id: row.get(2)?,
             published_date: row.get(3)?,
-            isbn: row.get(4)?,
+            open_library_id: row.get(4)?,
+            isbn: row.get(5)?,
+            buy: row.get(6)?,
             ..Default::default()
         })
     })?;
+
     rows.collect()
 }
 

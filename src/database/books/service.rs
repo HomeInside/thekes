@@ -49,4 +49,10 @@ impl BookService {
 
         repository::delete_book(&conn, item_id)
     }
+
+    pub fn search_by_title(&self, search: &str) -> Result<Vec<BooksModel>> {
+        let conn = self.db.get_conn().lock().map_err(|_| rusqlite::Error::InvalidQuery)?;
+
+        repository::search_one_book(&conn, search)
+    }
 }
