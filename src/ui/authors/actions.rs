@@ -115,18 +115,24 @@ impl Authors {
         cx.notify();
     }
 
-    pub fn find_authors(&self, query: &str) -> Vec<AuthorModel> {
+    pub fn find_authors(&self, query: &str) -> Result<Vec<AuthorModel>, String> {
         let query = query.trim().to_lowercase();
 
-        self.author_list
-            .iter()
-            .filter(|author| {
-                query.is_empty()
-                    || author.name.to_lowercase().contains(&query)
-                    || author.last_name.to_lowercase().contains(&query)
-            })
-            .cloned()
-            .collect()
+        match self.author_service.search_by_name(query.as_str()) {
+            Ok(list) => {
+                if list.is_empty() {
+                    let msg = "no se encontraron resultados";
+                    eprintln!("{}", msg);
+                    return Err(msg.to_string());
+                }
+                Ok(list)
+            }
+            Err(error) => {
+                let msg = format!("Error al consultar la lista de autores: {error}");
+                eprintln!("{}", msg);
+                Err(msg.into())
+            }
+        }
     }
 
     pub fn click_btn_new_author(&mut self, cx: &mut Context<Self>) {
@@ -135,13 +141,19 @@ impl Authors {
         cx.emit(AuthorViewEvent::ShowForm);
     } //click_btn_new_author
 
-    pub fn click_btn_search(&mut self, cx: &mut Context<Self>) {
-        println!("click_btn_search fn");
+    pub fn click_btn_search(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         let text_search = self.input_search.read(cx).value().to_string();
-        println!("input_search: {}", text_search);
 
-        self.author_list = self.find_authors(&text_search);
-        self.result_count = self.author_list.len();
+        let result = self.find_authors(&text_search);
+        match result {
+            Ok(list) => {
+                self.result_count = list.len();
+                self.author_list = list;
+            }
+            Err(error) => {
+                window.push_notification((NotificationType::Warning, error), cx);
+            }
+        }
         cx.notify();
     } //click_btn_search
 

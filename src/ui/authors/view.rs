@@ -317,7 +317,7 @@ impl Render for Authors {
                             Button::new("btn-search-author")
                                 .primary()
                                 .label("Buscar")
-                                .on_click(cx.listener(|this, _, _, cx| this.click_btn_search(cx))),
+                                .on_click(cx.listener(|this, _, window, cx| this.click_btn_search(window, cx))),
                         ),
                     ),
             )
