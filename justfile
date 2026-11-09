@@ -22,12 +22,11 @@ check: fmt
 
 [group("Dev")]
 clippy: fmt
-	#cargo clippy --all-targets --all-features -- -D warnings
-	cargo clippy --no-deps
+	cargo clippy --no-deps -- -D clippy::style -D clippy::correctness
 
 [group("Dev")]
-fix: check
-	cargo clippy --no-deps
+fix: fmt
+    cargo clippy --no-deps
 
 [group("Dev")]
 fix-all: fmt
@@ -52,34 +51,27 @@ release: fmt
 	cargo build --release
 
 [group("Watch")]
+[unix]
 watch:
-	#watchexec -c -w assets -w src -r cargo run
-	#watchexec -c -w src -e rs -r -- "./rust-reload.ps1"
+	watchexec -c -w src -e rs -r -- "cargo fmt && cargo run"
+
+[group("Watch")]
+[windows]
+watch:
+	#watchexec -c -w src -e rs -r cargo run
 	watchexec -c -w src -e rs -r -- "cargo fmt ; cargo run"
-	# watchexec -c -w src -e rs -r -- "pwsh -NoProfile -ExecutionPolicy Bypass -File .\rust-reload.ps1"
 
 [group("Watch")]
 c: fmt
-	watchexec -c -w src -r cargo check
-
-
-[group("Maintenance")]
-[windows]
-clean-all:
-	cargo clean ; rm .\target ; rm .\Cargo.lock
+	watchexec -c -w src -e rs -r cargo check
 
 [group("Maintenance")]
-[unix]
 clean-all:
 	cargo clean && rm -rf ./target && rm ./Cargo.lock
 
-[windows]
+[group("Maintenance")]
 show-b:
-	more .\target\build_version.conf
-
-[unix]
-show-b:
-	cat .\target\build_version.conf
+	cat ./target/build_version.conf
 
 [group("Maintenance")]
 [doc('Git check repo')]
@@ -88,8 +80,13 @@ gitc:
 	git gc --prune=now --aggressive
 	git count-objects -vH
 
+[windows]
 db-rm:
-	rm $env:LOCALAPPDATA\Thekes\data\thekes.db
+	rm -v $env:LOCALAPPDATA\Thekes\data\thekes.db
+
+[unix]
+db-rm:
+	rm -v ~/.local/share/thekes/thekes.db
 
 bundle-v:
 	cg-bundler --minify --keep-docs --no-expand-modules --validate
