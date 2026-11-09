@@ -47,22 +47,7 @@ impl Render for Dashboard {
                             .items_center()
                             .rounded_md()
                             //.bg(self.sidebar_config.accent)
-                            .text_color(rgb(0xffffff))
-                            //.child("+  Nuevo proyecto")
-                            .child(
-                                Button::new("nuevo-pro")
-                                    .ghost()
-                                    .small()
-                                    .icon(IconName::PanelLeftClose)
-                                    //TODO
-                                    // de esta forma se usa Self
-                                    //.on_click(cx.listener(Self::click_button_demo)),
-                                    .on_click(cx.listener(|this, _, _, cx| {
-                                        // de esta forma se usa this
-                                        this.click_button_demo(cx);
-                                        cx.notify();
-                                    })),
-                            ),
+                            .text_color(rgb(0xffffff)),
                     ),
             )
             // WELCOME PANEL
