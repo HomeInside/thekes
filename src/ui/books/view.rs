@@ -14,8 +14,8 @@ use gpui_kit::component::menu::DropdownMenu;
 use gpui_kit::component::scroll::ScrollableElement;
 use gpui_kit::component::{Icon, IconName};
 use gpui_kit::prelude::FluentBuilder;
-use gpui_kit::*;
-use gpui_kit::{Context, Entity, Render, Styled, Window};
+use gpui_kit::{AppContext, Context, Entity, Render, Styled, Window};
+use gpui_kit::{EventEmitter, FontWeight, InteractiveElement, ParentElement, div, px, rgb};
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]

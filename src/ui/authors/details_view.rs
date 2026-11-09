@@ -11,8 +11,8 @@ use gpui_kit::component::button::{Button, ButtonVariants};
 use gpui_kit::component::scroll::ScrollableElement;
 use gpui_kit::component::{Icon, IconName};
 use gpui_kit::component::{h_flex, v_flex};
-use gpui_kit::*;
 use gpui_kit::{Context, Render, Styled, Window};
+use gpui_kit::{EventEmitter, FontWeight, InteractiveElement, ParentElement, div, px, rgb};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, Default)]
@@ -71,7 +71,15 @@ impl AuthorDetailsView {
     }
 
     pub fn render_books(&self) -> impl IntoElement {
-        if !self.books.is_empty() {
+        if self.books.is_empty() {
+            //no se encontraron libros del autor con ID: {}", author_id
+            v_flex().gap_2().child(
+                div()
+                    .text_sm()
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .child("no se encontraron libros de este autor"),
+            )
+        } else {
             v_flex()
                 .gap_2()
                 .child(div().text_sm().font_weight(FontWeight::SEMIBOLD).child("Otras obras"))
@@ -84,14 +92,6 @@ impl AuthorDetailsView {
                         // 0x657DA0,
                     )
                 }))
-        } else {
-            //no se encontraron libros del autor con ID: {}", author_id
-            v_flex().gap_2().child(
-                div()
-                    .text_sm()
-                    .font_weight(FontWeight::SEMIBOLD)
-                    .child("no se encontraron libros de este autor"),
-            )
         }
     }
 

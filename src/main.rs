@@ -3,7 +3,7 @@
 
 use gpui_kit::assets::{Assets as ComponentAssets, icon_assets};
 use gpui_kit::component::TitleBar;
-use gpui_kit::*;
+use gpui_kit::{AppContext, AssetSource, Result, SharedString, WindowBounds, WindowOptions, px, size};
 use std::borrow::Cow;
 
 mod database;

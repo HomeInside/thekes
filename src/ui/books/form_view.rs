@@ -14,8 +14,8 @@ use gpui_kit::component::input::{Input, InputState, Textarea, TextareaState};
 use gpui_kit::component::scroll::ScrollableElement;
 use gpui_kit::component::select::{SearchableVec, Select, SelectState};
 use gpui_kit::component::{Icon, IconName, h_flex, v_flex};
-use gpui_kit::*;
-use gpui_kit::{Context, Entity, Render, Styled, Window};
+use gpui_kit::{AppContext, Context, Entity, Render, Styled, Window};
+use gpui_kit::{EventEmitter, FontWeight, InteractiveElement, ParentElement, div, px, rgb};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, Default)]

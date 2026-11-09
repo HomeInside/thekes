@@ -13,8 +13,8 @@ use gpui_kit::component::notification::NotificationType;
 use gpui_kit::component::scroll::ScrollableElement;
 use gpui_kit::component::{Icon, IconName};
 use gpui_kit::component::{h_flex, v_flex};
-use gpui_kit::*;
 use gpui_kit::{Context, Render, Styled, Window};
+use gpui_kit::{EventEmitter, FontWeight, InteractiveElement, ParentElement, div, px, rgb};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, Default)]
@@ -158,7 +158,7 @@ impl BookDetailsView {
             )
     }
 
-    /// links para ol_id e isbn
+    /// links para `ol_id` e isbn
     fn ref_link(
         id: &'static str,
         label: &'static str,
@@ -270,7 +270,7 @@ impl BookDetailsView {
         }
     }
 
-    /// convierte la info de BooksModel en BookDetailModel
+    /// convierte la info de `BooksModel` en `BookDetailModel`
     pub fn make_book_data(&mut self, book: &BooksModel, _cx: &mut Context<Self>) {
         self.book_detail.id = book.id;
         self.book_detail.title = book.title.clone();

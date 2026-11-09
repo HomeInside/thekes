@@ -38,7 +38,7 @@ impl Authors {
         Self {
             color_config: ColorConfig::default(),
             input_search: cx.new(|cx| InputState::new(window, cx).placeholder("Buscar por nombre...")),
-            authors_list: Vec::new(),
+            author_list: Vec::new(),
             result_count: 0,
             author_service,
             result_bio: String::from("—"),
@@ -67,7 +67,7 @@ impl Authors {
                 // conteo de genres
                 for author in &list {
                     // genres
-                    for genre in author.genres.split(",") {
+                    for genre in author.genres.split(',') {
                         let g = genre.trim().to_lowercase();
                         println!("g: {}", g);
                         if !g.is_empty() {
@@ -77,7 +77,8 @@ impl Authors {
                     // writing_lang
                     // esto debe validarse al momento de guardar
                     // aquí `None` y `Some("")`, y `Some(" ")` se tratan igual
-                    let lang = author.writing_lang.as_deref().map(str::trim).unwrap_or("");
+                    //let lang = author.writing_lang.as_deref().map(str::trim).unwrap_or("");
+                    let lang = author.writing_lang.as_deref().map_or("", str::trim);
                     if !lang.is_empty() {
                         lang_uniq.insert(lang);
                     }
@@ -105,7 +106,7 @@ impl Authors {
                 };
                 //
                 // lista de autores
-                self.authors_list = list;
+                self.author_list = list;
             }
             Err(error) => {
                 eprintln!("Error al consultar autores: {error}");
@@ -117,7 +118,7 @@ impl Authors {
     pub fn find_authors(&self, query: &str) -> Vec<AuthorModel> {
         let query = query.trim().to_lowercase();
 
-        self.authors_list
+        self.author_list
             .iter()
             .filter(|author| {
                 query.is_empty()
@@ -139,8 +140,8 @@ impl Authors {
         let text_search = self.input_search.read(cx).value().to_string();
         println!("input_search: {}", text_search);
 
-        self.authors_list = self.find_authors(&text_search);
-        self.result_count = self.authors_list.len();
+        self.author_list = self.find_authors(&text_search);
+        self.result_count = self.author_list.len();
         cx.notify();
     } //click_btn_search
 

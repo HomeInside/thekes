@@ -17,7 +17,7 @@ use gpui_kit::component::{
     date_picker::{DatePicker, DatePickerState, DateRangePreset},
 };
 use gpui_kit::prelude::FluentBuilder;
-use gpui_kit::*;
+use gpui_kit::{AppContext, EventEmitter, FontWeight, InteractiveElement, ParentElement, div, px, rgb};
 use gpui_kit::{Context, Entity, Render, Styled, Window};
 use std::sync::Arc;
 

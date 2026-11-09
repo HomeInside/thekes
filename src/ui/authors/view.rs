@@ -16,8 +16,8 @@ use gpui_kit::component::menu::DropdownMenu;
 use gpui_kit::component::scroll::ScrollableElement;
 use gpui_kit::component::{Icon, IconName};
 use gpui_kit::rgb;
-use gpui_kit::*;
 use gpui_kit::{Context, Entity, Render, Styled, Window};
+use gpui_kit::{EventEmitter, FontWeight, InteractiveElement, ParentElement, div, px};
 
 #[derive(Debug, Clone)]
 pub enum AuthorViewEvent {
@@ -32,7 +32,7 @@ pub enum AuthorViewEvent {
 pub struct Authors {
     pub(crate) color_config: ColorConfig,
     pub(crate) input_search: Entity<InputState>,
-    pub(crate) authors_list: Vec<AuthorModel>,
+    pub(crate) author_list: Vec<AuthorModel>,
     pub(crate) result_count: usize,
     pub(crate) result_bio: String,
     pub(crate) result_genre: String,
@@ -50,7 +50,7 @@ impl Authors {
             .flex()
             .flex_col()
             .gap_1()
-            .children(self.authors_list.iter().map(|author| self.author_row(author)))
+            .children(self.author_list.iter().map(|author| self.author_row(author)))
     }
 
     pub fn author_row(&self, author: &AuthorModel) -> impl IntoElement {
