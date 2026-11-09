@@ -116,7 +116,7 @@ impl Render for Books {
                                     Button::new("btn-search-book")
                                         .primary()
                                         .label("Buscar")
-                                        .on_click(cx.listener(|this, _, _, cx| this.click_btn_search(cx))),
+                                        .on_click(cx.listener(|this, _, window, cx| this.click_btn_search(window, cx))),
                                 ),
                             ),
                     ),
@@ -149,14 +149,24 @@ impl Books {
         }
     }
 
-    pub fn find_books(&self, query: &str) -> Vec<BooksModel> {
+    pub fn find_books(&self, query: &str) -> Result<Vec<BooksModel>, String> {
         let query = query.trim().to_lowercase();
 
-        self.book_list
-            .iter()
-            .filter(|book| query.is_empty() || book.title.to_lowercase().contains(&query))
-            .cloned()
-            .collect()
+        match self.book_service.search_by_title(query.as_str()) {
+            Ok(list) => {
+                if list.is_empty() {
+                    let msg = "no se encontraron resultados";
+                    eprintln!("{}", msg);
+                    return Err(msg.to_string());
+                }
+                Ok(list)
+            }
+            Err(error) => {
+                let msg = format!("Error al consultar la lista de libros: {error}");
+                eprintln!("{}", msg);
+                Err(msg.into())
+            }
+        }
     }
 
     fn draw_books(&self) -> impl IntoElement {

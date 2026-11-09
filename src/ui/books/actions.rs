@@ -55,13 +55,20 @@ impl Books {
         cx.emit(BookViewEvent::ShowForm);
     } //click_btn_new_book
 
-    pub fn click_btn_search(&mut self, cx: &mut Context<Self>) {
+    pub fn click_btn_search(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         println!("click_btn_search fn");
         let text_search = self.input_search.read(cx).value().to_string();
-        println!("input_search: {}", text_search);
 
-        self.book_list = self.find_books(&text_search);
-        self.result_count = self.book_list.len();
+        let result = self.find_books(&text_search);
+        match result {
+            Ok(list) => {
+                self.result_count = list.len();
+                self.book_list = list;
+            }
+            Err(error) => {
+                window.push_notification((NotificationType::Warning, error), cx);
+            }
+        }
         cx.notify();
     } //click_btn_search
 
