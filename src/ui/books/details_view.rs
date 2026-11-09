@@ -249,7 +249,7 @@ impl BookDetailsView {
 
     /// obtener el nombre del autor
     pub fn get_author_data(&mut self, author_id: i32, window: &mut Window, cx: &mut Context<Self>) {
-        println!("get_author_data fn",);
+        println!("get_author_data fn");
         match self.author_detail_service.get_one(author_id) {
             //TO CHECK
             Ok(Some(author)) => {
@@ -277,7 +277,7 @@ impl BookDetailsView {
         // author_names en `get_author_data`
         self.book_detail.author_id = book.author_id.clone().to_string();
         self.book_detail.synopsis = book.synopsis.clone();
-        self.book_detail.cover_color = book.cover_color.clone().unwrap_or(0x000000);
+        self.book_detail.cover_color = book.cover_color.unwrap_or(0x000000);
         self.book_detail.format_type = book.format_type.clone();
         //
         self.book_detail.published_date = book.published_date.clone().to_string();
@@ -293,7 +293,7 @@ impl BookDetailsView {
         //self.book_detail.buy = None; //"No existe enlace de compra".into();
         self.book_detail.buy = book.buy.clone();
         //
-        self.book_detail.created_at = date_utils::date_to_local_string(book.created_at.clone(), "en");
+        self.book_detail.created_at = date_utils::date_to_local_string(book.created_at.as_str(), "en");
     }
 }
 
@@ -376,7 +376,7 @@ impl Render for BookDetailsView {
                                                     .h(px(225.))
                                                     .w_full()
                                                     .rounded_lg()
-                                                    .bg(rgb(self.book_detail.cover_color.clone()))
+                                                    .bg(rgb(self.book_detail.cover_color))
                                                     .flex()
                                                     .flex_col()
                                                     .justify_end()

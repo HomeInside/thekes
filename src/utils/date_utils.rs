@@ -1,7 +1,7 @@
 use astrolabe::Date;
 
-pub fn date_to_local_string(in_date: String, lang: &str) -> String {
-    let the_date = Date::parse(in_date.as_str(), "yyyy-MM-dd").unwrap();
+pub fn date_to_local_string(in_date: &str, lang: &str) -> String {
+    let the_date = Date::parse(in_date, "yyyy-MM-dd").unwrap();
     let (year, month, day) = the_date.as_ymd();
 
     if lang == "es" {
