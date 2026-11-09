@@ -1,28 +1,35 @@
-use gpui_kit::IntoElement;
-use gpui_kit::*;
-use gpui_kit::{Context, Styled};
-
+use crate::database::DatabaseService;
+use crate::database::general::service::GeneralService;
 use crate::ui::main_window::ColorConfig;
+use gpui_kit::IntoElement;
+use gpui_kit::Styled;
 use gpui_kit::assets::IconName as AssetIconName;
 use gpui_kit::component::{Icon, IconName};
+use gpui_kit::{Context, Render, Window};
+use gpui_kit::{FontWeight, ParentElement, div, px, rgb};
+use std::sync::Arc;
 
 #[derive(Debug, Clone, Default)]
 pub struct LibraryStats {
-    authors: usize,
-    books: usize,
+    pub(crate) authors: usize,
+    pub(crate) books: usize,
+    pub(crate) favs: usize,
 }
 
 pub struct Dashboard {
-    dash_config: ColorConfig,
-    library_info: LibraryStats,
+    pub(crate) dash_config: ColorConfig,
+    pub(crate) library_info: LibraryStats,
+    pub(crate) general_service: GeneralService,
 }
 
 // métodos
 impl Dashboard {
-    pub fn new() -> Self {
+    pub fn new(_window: &mut Window, _cx: &mut Context<Self>, db: Arc<DatabaseService>) -> Self {
+        let general_service = GeneralService::new(db.clone());
         Self {
             dash_config: ColorConfig::default(),
             library_info: LibraryStats::default(),
+            general_service,
         }
     }
 
@@ -140,9 +147,24 @@ impl Render for Dashboard {
                 div()
                     .flex()
                     .gap_4()
-                    .child(self.sidebar_card(AssetIconName::LibraryBig, "Libros", "en tu biblioteca", 128))
-                    .child(self.sidebar_card(AssetIconName::Users, "Autores", "registrados", 42))
-                    .child(self.sidebar_card(IconName::Heart.into(), "Libros favoritos", "literatura destacada", 16)),
+                    .child(self.sidebar_card(
+                        AssetIconName::LibraryBig,
+                        "Libros",
+                        "en tu biblioteca",
+                        self.library_info.books,
+                    ))
+                    .child(self.sidebar_card(
+                        AssetIconName::Users,
+                        "Autores",
+                        "registrados",
+                        self.library_info.authors,
+                    ))
+                    .child(self.sidebar_card(
+                        IconName::Heart.into(),
+                        "Libros favoritos",
+                        "literatura destacada",
+                        self.library_info.favs,
+                    )),
             )
     }
 }
