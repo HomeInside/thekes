@@ -1,5 +1,6 @@
 pub mod authors;
 pub mod books;
+pub mod general;
 mod manage;
 pub mod seed;
 mod service;

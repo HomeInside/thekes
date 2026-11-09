@@ -164,7 +164,7 @@ impl Books {
             Err(error) => {
                 let msg = format!("Error al consultar la lista de libros: {error}");
                 eprintln!("{}", msg);
-                Err(msg.into())
+                Err(msg)
             }
         }
     }

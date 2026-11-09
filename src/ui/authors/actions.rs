@@ -130,7 +130,7 @@ impl Authors {
             Err(error) => {
                 let msg = format!("Error al consultar la lista de autores: {error}");
                 eprintln!("{}", msg);
-                Err(msg.into())
+                Err(msg)
             }
         }
     }
