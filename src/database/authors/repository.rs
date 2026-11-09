@@ -125,8 +125,10 @@ pub fn add_author(conn: &Connection, author: &AuthorModel) -> Result<usize, Erro
         author.notes,
     ])?;
 
-    let last_row_id = conn.last_insert_rowid() as usize;
-    //
+    //let last_row_id = conn.last_insert_rowid() as usize;
+    let row_id = conn.last_insert_rowid();
+    let last_row_id = usize::try_from(row_id).map_err(|_| rusqlite::Error::IntegralValueOutOfRange(0, row_id))?;
+
     Ok(last_row_id)
 }
 

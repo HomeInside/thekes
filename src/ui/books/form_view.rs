@@ -112,7 +112,7 @@ impl BookFormView {
             cover_color: cx.new(|cx| InputState::new(window, cx).placeholder("Ej. 0xF4D5C2")),
             author_service,
             book_service,
-            errors: Default::default(),
+            errors: FormBookErrors::default(),
         }
     }
 

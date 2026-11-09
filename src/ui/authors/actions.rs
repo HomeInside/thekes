@@ -83,16 +83,16 @@ impl Authors {
                     }
                 }
                 //
-                self.result_genre = if gen_uniq.len() > 0 {
-                    gen_uniq.len().to_string()
-                } else {
+                self.result_genre = if gen_uniq.is_empty() {
                     "—".into()
+                } else {
+                    gen_uniq.len().to_string()
                 };
                 //
-                self.result_lang = if lang_uniq.len() > 0 {
-                    lang_uniq.len().to_string()
-                } else {
+                self.result_lang = if lang_uniq.is_empty() {
                     "—".into()
+                } else {
+                    lang_uniq.len().to_string()
                 };
                 //
                 // conteo de biography

@@ -116,7 +116,6 @@ impl AuthorFormView {
 
         self.errors.err_date_of_death = match death_date_opt {
             // si no hay fecha seleccionada, es válido
-            None => String::new(),
             Some(dd) if dd > today => "esta fecha no puede ser una fecha futura.".into(),
             // la fecha de fallecimiento debe ser mayor a la fecha de nacimiento
             Some(dd)
@@ -125,7 +124,7 @@ impl AuthorFormView {
             {
                 "esta fecha debe ser posterior al nacimiento.".into()
             }
-            Some(_) => String::new(),
+            Some(_) | None => String::new(),
         };
 
         // genres
@@ -245,10 +244,7 @@ impl AuthorFormView {
             && self.errors.err_notes.is_empty();
 
         author.date_of_birth = birth_date_opt.unwrap_or_default().to_string();
-        author.date_of_death = match death_date_opt {
-            Some(dd) => Some(dd.to_string()),
-            None => None,
-        };
+        author.date_of_death = death_date_opt.map(|dd| dd.to_string());
 
         if ok {
             // (self.on_save)(book, window, cx);

@@ -141,7 +141,7 @@ impl BookFormView {
             Ok(value) => {
                 // TODO guardar el valor
                 println!("aqui el valor: {}", value);
-                if value < 1 || value > 1500 {
+                if !(1..=1500).contains(&value) {
                     self.errors.err_page_count = "el número de paginas debe estar entre 1 y 1500".to_string();
                 } else {
                     self.errors.err_page_count = String::new();

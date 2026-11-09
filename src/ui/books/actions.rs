@@ -120,7 +120,7 @@ impl Books {
                 println!("eliminando libro...");
 
                 // TO CHECK
-                match books.book_service.remove_book(book_id as i32) {
+                match books.book_service.remove_book(book_id) {
                     Ok(_result) => {
                         window.push_notification((NotificationType::Success, "Book deleted"), cx);
                         books.load_books(cx);

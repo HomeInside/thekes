@@ -129,8 +129,10 @@ pub fn add_book(conn: &Connection, book: &BooksModel) -> Result<usize, Error> {
         book.cover_color
     ])?;
 
-    let last_row_id = conn.last_insert_rowid() as usize;
-    //
+    //let last_row_id = conn.last_insert_rowid() as usize;
+    let row_id = conn.last_insert_rowid();
+    let last_row_id = usize::try_from(row_id).map_err(|_| rusqlite::Error::IntegralValueOutOfRange(0, row_id))?;
+
     Ok(last_row_id)
 }
 
