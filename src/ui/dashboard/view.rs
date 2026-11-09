@@ -1,21 +1,26 @@
 use gpui_kit::IntoElement;
-use gpui_kit::component::Sizable;
-use gpui_kit::component::button::{Button, ButtonVariants};
 use gpui_kit::*;
 use gpui_kit::{Context, Styled};
 
 use crate::ui::main_window::ColorConfig;
-use gpui_kit::component::IconName;
+use gpui_kit::assets::IconName as AssetIconName;
+use gpui_kit::component::{Icon, IconName};
+
+#[derive(Debug, Clone, Default)]
+pub struct LibraryStats {
+    authors: usize,
+    books: usize,
+}
 
 pub struct Dashboard {
     dash_config: ColorConfig,
+    library_info: LibraryStats,
 }
 
 impl Render for Dashboard {
-    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        //
+    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
         div()
-            // HEADER
+            // Header
             .child(
                 div()
                     .flex()
@@ -32,12 +37,7 @@ impl Render for Dashboard {
                                     .font_weight(FontWeight::SEMIBOLD)
                                     .child("Inicio"),
                             )
-                            .child(
-                                div()
-                                    .text_sm()
-                                    //.text_color(self.sidebar_config.muted)
-                                    .child("Tu espacio de trabajo, organizado."),
-                            ),
+                            .child(div().text_sm().child("Tu biblioteca, organizada.")),
                     )
                     .child(
                         div()
@@ -46,86 +46,49 @@ impl Render for Dashboard {
                             .flex()
                             .items_center()
                             .rounded_md()
-                            //.bg(self.sidebar_config.accent)
                             .text_color(rgb(0xffffff)),
                     ),
             )
-            // WELCOME PANEL
+            // Welcome Panel
             .child(
                 div()
                     .w_full()
                     .p_6()
                     .rounded_xl()
                     .border_1()
-                    //.border_color(self.sidebar_config.border)
                     .bg(rgb(0xffffff))
                     .flex()
                     .flex_col()
                     .gap_3()
                     .child(
                         div()
-                            .text_size(px(22.))
+                            .text_size(px(20.))
                             .font_weight(FontWeight::SEMIBOLD)
                             .child("Todo en su lugar."),
                     )
                     .child(
                         div()
                             .text_sm()
-                            //.text_color(self.sidebar_config.muted)
                             .child("Organiza tu biblioteca y encuentra rápidamente lo que necesitas."),
                     ),
             )
-            // ACCESO RÁPIDO
+            // Acceso rápido
             .child(
-                div()
-                    .flex()
-                    .items_center()
-                    .justify_between()
-                    .child(
-                        div()
-                            .text_size(px(18.))
-                            .font_weight(FontWeight::SEMIBOLD)
-                            .child("Acceso rápido"),
-                    )
-                    .child(
-                        div()
-                            .text_sm()
-                            //.text_color(self.sidebar_config.accent)
-                            .child("Ver todo"),
-                    ),
+                div().flex().items_center().justify_between().child(
+                    div()
+                        .text_size(px(18.))
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .child("Acceso rápido"),
+                ),
             )
-            // CARDS
+            // Cards
             .child(
                 div()
                     .flex()
                     .gap_4()
-                    .child(self.sidebar_card(
-                        "▣",
-                        "Mis proyectos",
-                        "Organiza tu trabajo",
-                        rgb(0xf9e6dc),
-                        self.dash_config.accent,
-                        self.dash_config.border,
-                        self.dash_config.muted,
-                    ))
-                    .child(self.sidebar_card(
-                        "☆",
-                        "Favoritos",
-                        "Elementos destacados",
-                        rgb(0xf6efcf),
-                        rgb(0x9d7b20),
-                        self.dash_config.border,
-                        self.dash_config.muted,
-                    ))
-                    .child(self.sidebar_card(
-                        "◷",
-                        "Recientes",
-                        "Continúa donde lo dejaste",
-                        rgb(0xe2ece4),
-                        rgb(0x497653),
-                        self.dash_config.border,
-                        self.dash_config.muted,
-                    )),
+                    .child(self.sidebar_card(AssetIconName::LibraryBig, "Libros", "en tu biblioteca", 128))
+                    .child(self.sidebar_card(AssetIconName::Users, "Autores", "registrados", 42))
+                    .child(self.sidebar_card(IconName::Heart.into(), "Libros favoritos", "literatura destacada", 16)),
             )
     }
 }
@@ -135,19 +98,16 @@ impl Dashboard {
     pub fn new() -> Self {
         Self {
             dash_config: ColorConfig::default(),
+            library_info: LibraryStats::default(),
         }
     }
 
-    #[allow(clippy::too_many_arguments)]
     pub fn sidebar_card(
         &self,
-        icon: &'static str,
+        icon: AssetIconName,
         title: &'static str,
         description: &'static str,
-        _icon_bg: impl Into<gpui_kit::Hsla>,
-        icon_color: impl Into<gpui_kit::Hsla>,
-        border: impl Into<gpui_kit::Hsla>,
-        muted: impl Into<gpui_kit::Hsla>,
+        count: usize,
     ) -> impl IntoElement {
         div()
             .flex_1()
@@ -155,30 +115,34 @@ impl Dashboard {
             .p_4()
             .rounded_lg()
             .border_1()
-            .border_color(border)
+            .border_color(self.dash_config.border)
             .bg(rgb(0xffffff))
             .flex()
             .flex_col()
-            .gap_4()
+            .gap_3()
             .child(
                 div()
                     .size(px(40.))
-                    .rounded_md()
-                    .bg(rgb(0xFFCCE5))
-                    .text_color(icon_color)
+                    .rounded_lg()
+                    .bg(rgb(0xF4D5C2))
                     .flex()
                     .items_center()
                     .justify_center()
-                    .text_size(px(20.))
-                    .child(icon),
+                    .child(Icon::new(icon).text_color(rgb(0xB94B1B))),
+            )
+            .child(
+                div()
+                    .text_size(px(27.))
+                    .font_weight(FontWeight::BOLD)
+                    .child(count.to_string()),
             )
             .child(
                 div()
                     .flex()
                     .flex_col()
                     .gap_1()
-                    .child(div().font_weight(FontWeight::MEDIUM).child(title))
-                    .child(div().text_xs().text_color(muted).child(description)),
+                    .child(div().font_weight(FontWeight::SEMIBOLD).child(title))
+                    .child(div().text_xs().text_color(self.dash_config.muted).child(description)),
             )
     }
 }
