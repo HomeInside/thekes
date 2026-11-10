@@ -33,9 +33,9 @@ pub fn add_default_author(conn: &Connection) -> Result<(), Box<dyn Error>> {
     )?;
     conn.execute(
         "INSERT INTO books (
-            title,author_id,synopsis,lang,cover,page_count,format_type,genres,published_date,publisher,open_library_id,buy, cover_color
+            title,author_id,synopsis,lang,cover,page_count,format_type,genres,published_date,publisher,open_library_id,buy, cover_color, favorite, current_read
         )
-        SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13
+        SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15
         WHERE NOT EXISTS (
             SELECT 1 FROM books
             WHERE title = ?1 AND author_id = ?2
@@ -54,6 +54,8 @@ pub fn add_default_author(conn: &Connection) -> Result<(), Box<dyn Error>> {
             "OL262421W",
             "https://www.amazon.com/s?k=The+Adventures+of+Sherlock+Holmes+Arthur+Conan+Doyle&i=stripbooks",
             Some(0x000000),
+            0,
+            0
         ],
     )?;
 
