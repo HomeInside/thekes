@@ -174,3 +174,14 @@ pub fn set_favorite_book(conn: &Connection, id: i32) -> Result<bool> {
 
     Ok(is_favorite)
 }
+
+/// Actualiza el estado de lectura de un libro
+pub fn set_status_reading(conn: &Connection, id: i32, new_value: i32) -> Result<Option<i32>> {
+    let current_status = conn.query_row(
+        "UPDATE books SET current_read = ?1 WHERE id = ?2 RETURNING current_read;",
+        rusqlite::params![new_value, id],
+        |row| row.get(0),
+    )?;
+
+    Ok(current_status)
+}

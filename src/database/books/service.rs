@@ -61,4 +61,10 @@ impl BookService {
 
         repository::set_favorite_book(&conn, item_id)
     }
+
+    pub fn save_current_status(&self, item_id: i32, new_value: i32) -> Result<Option<i32>> {
+        let conn = self.db.get_conn().lock().map_err(|_| rusqlite::Error::InvalidQuery)?;
+
+        repository::set_status_reading(&conn, item_id, new_value)
+    }
 }
