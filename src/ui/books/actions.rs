@@ -5,6 +5,7 @@ use gpui_kit::Action;
 use gpui_kit::component::WindowExt;
 use gpui_kit::component::notification::NotificationType;
 use gpui_kit::{Context, Window};
+use gpui_kit::{Rgba, rgb};
 
 #[derive(Clone, PartialEq)]
 pub enum BookOperation {
@@ -21,6 +22,46 @@ pub enum BookOperation {
 pub struct BookAction {
     pub book_id: i32,
     pub book_op: BookOperation,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(i32)]
+pub enum ReadingStatus {
+    None = 0,
+    Reading = 1,
+    WantToRead = 2,
+    Finished = 3,
+}
+
+impl From<u32> for ReadingStatus {
+    fn from(value: u32) -> Self {
+        match value {
+            1 => Self::Reading,
+            2 => Self::WantToRead,
+            3 => Self::Finished,
+            _ => Self::None,
+        }
+    }
+}
+
+impl From<ReadingStatus> for i32 {
+    fn from(value: ReadingStatus) -> Self {
+        value as i32
+    }
+}
+
+impl ReadingStatus {
+    pub fn color(self) -> Rgba {
+        match self {
+            Self::Reading => rgb(0x3B82F6),
+            Self::WantToRead => rgb(0xF59E0B),
+            Self::Finished => rgb(0x22C55E),
+            Self::None => rgb(0x808080),
+        }
+    }
+    pub fn default(self) -> Rgba {
+        rgb(0x808080)
+    }
 }
 
 //acciones/eventos
@@ -93,17 +134,39 @@ impl Books {
         cx.notify();
     }
 
-    pub fn set_reading(&mut self, book_id: i32, _cx: &mut Context<Self>) {
-        println!("set_reading fn");
-        println!("set_reading book_id: {}", book_id);
-    }
-    pub fn set_want_to_read(&mut self, book_id: i32, _cx: &mut Context<Self>) {
-        println!("set_want_to_read fn");
-        println!("set_want_to_read book_id: {}", book_id);
-    }
-    pub fn set_finished(&mut self, book_id: i32, _cx: &mut Context<Self>) {
-        println!("set_finished fn");
-        println!("set_finished book_id: {}", book_id);
+    pub fn set_current_status(
+        &mut self,
+        book_id: i32,
+        new_value: ReadingStatus,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        match self.book_service.save_current_status(book_id, new_value.into()) {
+            Ok(Some(result)) => {
+                //
+                let msg = match result {
+                    1 => "¡Libro marcado como: actualmente leyendo!",
+                    2 => "¡Libro marcado como: quiero leerlo!",
+                    3 => "¡Libro marcado como: finalizado!",
+                    _ => "¡Libro desmarcado!",
+                };
+
+                window.push_notification((NotificationType::Success, msg), cx);
+            }
+            Ok(None) => {
+                let msg = format!("Ocurrió un error, al actualizar el libro");
+                eprintln!("{}", msg);
+
+                window.push_notification((NotificationType::Warning, msg), cx);
+            }
+            Err(error) => {
+                let msg = format!("Ocurrió un error, al actualizar el libro: {}", error);
+                eprintln!("{}", msg);
+
+                window.push_notification((NotificationType::Error, msg), cx);
+            }
+        }
+        cx.notify();
     }
 
     pub fn show_details(&mut self, book_id: i32, window: &mut Window, cx: &mut Context<Self>) {
@@ -169,13 +232,13 @@ impl Books {
                 self.toggle_favorite(action.book_id, window, cx);
             }
             BookOperation::Reading => {
-                self.set_reading(action.book_id, cx);
+                self.set_current_status(action.book_id, ReadingStatus::Reading, window, cx);
             }
             BookOperation::WantToRead => {
-                self.set_want_to_read(action.book_id, cx);
+                self.set_current_status(action.book_id, ReadingStatus::WantToRead, window, cx);
             }
             BookOperation::Finished => {
-                self.set_finished(action.book_id, cx);
+                self.set_current_status(action.book_id, ReadingStatus::Finished, window, cx);
             }
             BookOperation::Details => {
                 self.show_details(action.book_id, window, cx);
