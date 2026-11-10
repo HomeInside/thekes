@@ -534,29 +534,6 @@ impl Render for AuthorDetailsView {
                         v_flex()
                             .gap_4()
                             // TODO vamos por aqui
-                            // Obras destacadas
-                            /*
-                            .child(
-                                h_flex()
-                                    .w_full()
-                                    .gap_3()
-                                    .child(Self::featured_book(
-                                        "Alice's Adventures in Wonderland",
-                                        "1865",
-                                        "Novela · Fantasía",
-                                        0x52776D,
-                                        "ALICE",
-                                    ))
-                                    .child(Self::featured_book(
-                                        "Through the Looking-Glass",
-                                        "1871",
-                                        "Novela · Fantasía",
-                                        0x76658C,
-                                        "MIRROR",
-                                    )),
-                            )
-                            */
-                            // lista secundaria
                             .child(self.render_books()),
                     ))
                     //
