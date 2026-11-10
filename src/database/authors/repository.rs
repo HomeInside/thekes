@@ -4,7 +4,7 @@ use rusqlite::{Connection, OptionalExtension, Result, params};
 
 pub fn all_authors(conn: &Connection) -> Result<Vec<AuthorModel>, Error> {
     let mut stmt = conn.prepare(
-		"SELECT id, name, last_name, birth_place, date_of_birth, date_of_death, genres, biography, writing_lang, cover_color FROM authors",
+		"SELECT id, name, last_name, birth_place, date_of_birth, date_of_death, genres, biography, writing_lang, cover_color, open_library_id, viaf_id FROM authors",
 	)?;
 
     let authors_list = stmt.query_map([], |row| {
@@ -19,6 +19,8 @@ pub fn all_authors(conn: &Connection) -> Result<Vec<AuthorModel>, Error> {
             biography: row.get(7)?,
             writing_lang: row.get(8)?,
             cover_color: row.get(9)?,
+            open_library_id: row.get(10)?,
+            viaf_id: row.get(11)?,
             ..Default::default()
         })
     })?;
