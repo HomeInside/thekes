@@ -72,10 +72,27 @@ impl Books {
         cx.notify();
     } //click_btn_search
 
-    pub fn toggle_favorite(&mut self, book_id: i32, _cx: &mut Context<Self>) {
-        println!("toggle_favorite fn");
-        println!("toggle_favorite book_id: {}", book_id);
+    pub fn toggle_favorite(&mut self, book_id: i32, window: &mut Window, cx: &mut Context<Self>) {
+        match self.book_service.mark_as_fav(book_id) {
+            Ok(result) => {
+                let msg = if result {
+                    "¡Libro marcado como favorito!"
+                } else {
+                    "Libro eliminado de favoritos"
+                };
+
+                window.push_notification((NotificationType::Success, msg), cx);
+            }
+            Err(error) => {
+                let msg = format!("Ocurrió un error, al actualizar el libro: {}", error);
+                eprintln!("{}", msg);
+
+                window.push_notification((NotificationType::Warning, msg), cx);
+            }
+        }
+        cx.notify();
     }
+
     pub fn set_reading(&mut self, book_id: i32, _cx: &mut Context<Self>) {
         println!("set_reading fn");
         println!("set_reading book_id: {}", book_id);
@@ -149,7 +166,7 @@ impl Books {
 
         match &action.book_op {
             BookOperation::Favorite => {
-                self.toggle_favorite(action.book_id, cx);
+                self.toggle_favorite(action.book_id, window, cx);
             }
             BookOperation::Reading => {
                 self.set_reading(action.book_id, cx);
@@ -167,8 +184,9 @@ impl Books {
                 self.delete_item(action.book_id, window, cx);
             }
         }
+        self.load_books(cx);
 
         // despues, si los métodos modifican el estado, sin notificar
-        //cx.notify();
+        cx.notify();
     }
 }
