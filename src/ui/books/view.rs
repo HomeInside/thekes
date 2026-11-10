@@ -184,6 +184,8 @@ impl Books {
         let _book_title = book.title.clone();
         let button_id = format!("book-menu-{}", book.id);
         let buy = book.buy.clone();
+        //cualquier valor distinto de cero es usado como favorito
+        let is_fav = book.favorite.unwrap_or(0) != 0;
 
         div()
             .id(format!("book-card-{}", book.title))
@@ -257,6 +259,7 @@ impl Books {
                                     let buy = buy
                                         .clone()
                                         .unwrap_or_else(|| "https://www.amazon.com/amz-books/store".to_string());
+                                    let is_fav = is_fav.clone();
 
                                     menu.menu_with_icon(
                                         "Detalles",
@@ -269,7 +272,12 @@ impl Books {
                                     .separator()
                                     .menu_with_icon(
                                         "Favorito",
-                                        IconName::Heart,
+                                        Icon::new(IconName::Heart).text_color(if is_fav {
+                                            rgb(0xEF4444)
+                                        } else {
+                                            rgb(0x808080)
+                                        }),
+                                        //
                                         Box::new(BookAction {
                                             book_id,
                                             book_op: BookOperation::Favorite,
