@@ -10,7 +10,7 @@ impl Dashboard {
             Ok(Some(stats)) => {
                 self.library_info.authors = usize::try_from(stats.authors).unwrap_or(0);
                 self.library_info.books = usize::try_from(stats.books).unwrap_or(0);
-                //self.library_info.favs = usize::try_from(stats.favs).unwrap_or(0);
+                self.library_info.favs = usize::try_from(stats.favs).unwrap_or(0);
             }
             Ok(None) => {
                 let msg = "no se encontra estadísticas";
