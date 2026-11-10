@@ -39,7 +39,7 @@ pub fn init_db(conn: &Connection) -> Result<(), Box<dyn Error>> {
         buy TEXT NULL,
         cover_color INTEGER NULL,
         favorite INTEGER NOT NULL DEFAULT 0 CHECK (favorite IN (0, 1)),
-        current_read INTEGER NOT NULL DEFAULT 0,
+        current_read INTEGER NOT NULL DEFAULT 0 CHECK (current_read IN (0, 1, 2, 3)),
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at TEXT NULL DEFAULT CURRENT_TIMESTAMP
 	);
