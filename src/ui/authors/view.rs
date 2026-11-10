@@ -15,6 +15,7 @@ use gpui_kit::component::input::{Input, InputState};
 use gpui_kit::component::menu::DropdownMenu;
 use gpui_kit::component::scroll::ScrollableElement;
 use gpui_kit::component::{Icon, IconName};
+use gpui_kit::prelude::FluentBuilder;
 use gpui_kit::rgb;
 use gpui_kit::{Context, Entity, Render, Styled, Window};
 use gpui_kit::{EventEmitter, FontWeight, InteractiveElement, ParentElement, div, px};
@@ -61,6 +62,8 @@ impl Authors {
 
         let cover_color = author.cover_color.unwrap_or(0xF4D5C2);
         let accent = rgb(cover_color);
+        let open_library = author.open_library_id.clone();
+        let viaf = author.viaf_id.clone();
 
         div()
             /*
@@ -139,6 +142,9 @@ impl Authors {
                     .tooltip("Más opciones")
                     .dropdown_menu({
                         move |menu, _window, _cx| {
+                            let open_library = open_library.clone();
+                            let viaf = viaf.clone();
+
                             menu.menu_with_icon(
                                 "Favorito",
                                 IconName::Heart,
@@ -155,7 +161,23 @@ impl Authors {
                                     author_op: AuthorOperation::Details,
                                 }),
                             )
+                            //
                             .separator()
+                            // se utiliza `true` para que el elemento siempre se agregue al menú
+                            .when(true, |this| match open_library.as_deref() {
+                                Some(url) if !url.is_empty() => {
+                                    this.link("Open Library", format!("https://openlibrary.org/authors/{}", url))
+                                }
+                                _ => this.label("Open Library no disponible"),
+                            })
+                            .when(true, |this| match viaf.as_deref() {
+                                Some(url) if !url.is_empty() => {
+                                    this.link("VIAF", format!("https://viaf.org/viaf/{}", url))
+                                }
+                                _ => this.label("VIAF no disponible"),
+                            })
+                            .separator()
+                            //
                             .menu_with_icon(
                                 "Eliminar",
                                 AssetIconName::Trash,
