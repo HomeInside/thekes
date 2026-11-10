@@ -55,4 +55,10 @@ impl BookService {
 
         repository::search_one_book(&conn, search)
     }
+
+    pub fn mark_as_fav(&self, item_id: i32) -> Result<bool> {
+        let conn = self.db.get_conn().lock().map_err(|_| rusqlite::Error::InvalidQuery)?;
+
+        repository::set_favorite_book(&conn, item_id)
+    }
 }

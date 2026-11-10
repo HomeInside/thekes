@@ -20,6 +20,8 @@ pub struct BooksModel {
     //
     pub buy: Option<String>,
     pub(crate) cover_color: Option<u32>,
+    pub(crate) favorite: Option<u32>,
+    pub(crate) current_read: Option<u32>,
     pub created_at: String,
     pub updated_at: Option<String>,
 }

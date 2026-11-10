@@ -5,8 +5,9 @@ use super::model::BooksModel;
 
 #[allow(dead_code)]
 pub fn all_books(conn: &Connection) -> Result<Vec<BooksModel>, Error> {
-    let mut stmt =
-        conn.prepare("SELECT id, title, author_id, published_date, open_library_id, isbn, buy FROM books")?;
+    let mut stmt = conn.prepare(
+        "SELECT id, title, author_id, published_date, open_library_id, isbn, buy,favorite,current_read FROM books",
+    )?;
 
     let books_list = stmt.query_map([], |row| {
         Ok(BooksModel {
@@ -17,6 +18,8 @@ pub fn all_books(conn: &Connection) -> Result<Vec<BooksModel>, Error> {
             open_library_id: row.get(4)?,
             isbn: row.get(5)?,
             buy: row.get(6)?,
+            favorite: row.get(7)?,
+            current_read: row.get(8)?,
             ..Default::default()
         })
     })?;
@@ -93,7 +96,7 @@ pub fn search_book_by_id(conn: &Connection, item_id: i32) -> Result<Option<Books
 pub fn search_one_book(conn: &Connection, title: &str) -> Result<Vec<BooksModel>, Error> {
     println!("search_one_book fn: {}", title);
     let mut stmt = conn.prepare(
-        "SELECT id, title, author_id, published_date, open_library_id, isbn, buy FROM books WHERE title LIKE :title",
+        "SELECT id, title, author_id, published_date, open_library_id, isbn, buy,favorite,current_read FROM books WHERE title LIKE :title",
     )?;
     let sql = format!("%{}%", title.trim().to_lowercase());
 
@@ -106,6 +109,8 @@ pub fn search_one_book(conn: &Connection, title: &str) -> Result<Vec<BooksModel>
             open_library_id: row.get(4)?,
             isbn: row.get(5)?,
             buy: row.get(6)?,
+            favorite: row.get(7)?,
+            current_read: row.get(8)?,
             ..Default::default()
         })
     })?;
@@ -156,4 +161,16 @@ pub fn edit_book(conn: &Connection, item_id: i32, book: &BooksModel) -> Result<u
     ])?;
 
     Ok(rows)
+}
+
+/// actualiza un libro como favorito (ó no)
+pub fn set_favorite_book(conn: &Connection, id: i32) -> Result<bool> {
+    // hace un toggle del valor directamente en la tabla
+    let is_favorite: bool = conn.query_row(
+        "UPDATE books SET favorite = NOT favorite WHERE id = :id RETURNING favorite;",
+        [id],
+        |row| row.get(0),
+    )?;
+
+    Ok(is_favorite)
 }
