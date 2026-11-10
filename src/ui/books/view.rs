@@ -1,4 +1,4 @@
-use super::{BookAction, BookOperation};
+use super::{BookAction, BookOperation, ReadingStatus};
 use crate::database::DatabaseService;
 use crate::database::books::model::BooksModel;
 use crate::database::books::service::BookService;
@@ -24,6 +24,7 @@ pub enum BookViewEvent {
     List,
     Details { info: Box<BooksModel> },
 }
+
 pub struct Books {
     color_config: ColorConfig,
     pub input_search: Entity<InputState>,
@@ -184,8 +185,11 @@ impl Books {
         let _book_title = book.title.clone();
         let button_id = format!("book-menu-{}", book.id);
         let buy = book.buy.clone();
-        //cualquier valor distinto de cero es usado como favorito
-        let is_fav = book.favorite.unwrap_or(0) != 0;
+
+        // cualquier valor distinto de cero es usado como favorito
+        let is_fav = book.favorite.clone() != 0;
+        // se usa el estado para fijar el color
+        let reading_status = ReadingStatus::from(book.current_read.clone());
 
         div()
             .id(format!("book-card-{}", book.title))
@@ -260,6 +264,7 @@ impl Books {
                                         .clone()
                                         .unwrap_or_else(|| "https://www.amazon.com/amz-books/store".to_string());
                                     let is_fav = is_fav.clone();
+                                    let reading_status = reading_status.clone();
 
                                     menu.menu_with_icon(
                                         "Detalles",
@@ -277,7 +282,6 @@ impl Books {
                                         } else {
                                             rgb(0x808080)
                                         }),
-                                        //
                                         Box::new(BookAction {
                                             book_id,
                                             book_op: BookOperation::Favorite,
@@ -285,7 +289,13 @@ impl Books {
                                     )
                                     .menu_with_icon(
                                         "Estoy leyendo",
-                                        AssetIconName::BookOpenCheck,
+                                        Icon::new(AssetIconName::BookOpenCheck).text_color(
+                                            if reading_status == ReadingStatus::Reading {
+                                                reading_status.color()
+                                            } else {
+                                                reading_status.default()
+                                            },
+                                        ),
                                         Box::new(BookAction {
                                             book_id,
                                             book_op: BookOperation::Reading,
@@ -293,7 +303,13 @@ impl Books {
                                     )
                                     .menu_with_icon(
                                         "Quiero leer",
-                                        AssetIconName::ListTodo,
+                                        Icon::new(AssetIconName::ListTodo).text_color(
+                                            if reading_status == ReadingStatus::WantToRead {
+                                                reading_status.color()
+                                            } else {
+                                                reading_status.default()
+                                            },
+                                        ),
                                         Box::new(BookAction {
                                             book_id,
                                             book_op: BookOperation::WantToRead,
@@ -301,7 +317,13 @@ impl Books {
                                     )
                                     .menu_with_icon(
                                         "Finalizado",
-                                        AssetIconName::CircleCheckBig,
+                                        Icon::new(AssetIconName::CircleCheckBig).text_color(
+                                            if reading_status == ReadingStatus::Finished {
+                                                reading_status.color()
+                                            } else {
+                                                reading_status.default()
+                                            },
+                                        ),
                                         Box::new(BookAction {
                                             book_id,
                                             book_op: BookOperation::Finished,
