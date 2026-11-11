@@ -263,13 +263,13 @@ impl Render for Dashboard {
                         Icon::new(AssetIconName::Users).text_color(rgb(0xB94B1B)).size_5(),
                         "Autores",
                         self.library_info.authors.to_string(),
-                        "\"las voces de tus historias\"",
+                        "las voces de tus historias",
                     ))
                     .child(self.dash_card(
                         Icon::new(IconName::Heart).text_color(rgb(0xB94B1B)).size_5(),
                         "Favoritos",
                         self.library_info.favs.to_string(),
-                        "esos que siempre vuelves a leer",
+                        "lecturas imprescindibles",
                     ))
                     .child(self.dash_card(
                         Icon::new(IconName::Building2).text_color(rgb(0xB94B1B)).size_5(),
