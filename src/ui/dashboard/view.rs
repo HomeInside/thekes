@@ -19,6 +19,7 @@ pub struct LibraryStats {
     pub(crate) lang: usize,
     pub(crate) quote: String,
     //
+    pub have_r_book: bool,
     pub rb_title: String,
     pub rb_published: String,
     pub rb_cover_color: u32,
@@ -135,6 +136,43 @@ impl Dashboard {
 
     /// libro recomendado
     pub fn recommendation_card(&self) -> impl IntoElement {
+        let book_info = if self.library_info.have_r_book {
+            div()
+                .flex()
+                .flex_col()
+                .gap_1()
+                .min_w_0()
+                .child(
+                    div()
+                        .text_base()
+                        .font_weight(FontWeight::SEMIBOLD)
+                        .text_color(rgb(0x292B29))
+                        .text_ellipsis()
+                        //.child("las aventuras de sherlck holmes"),
+                        .child(self.library_info.rb_title.clone()),
+                )
+                .child(
+                    div()
+                        .text_sm()
+                        .text_color(rgb(0x34352F))
+                        .text_ellipsis()
+                        //.child("Sir Arthur Conan Doyle"),
+                        .child(self.library_info.r_author.clone()),
+                )
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(self.dash_config.muted)
+                        //.child("Publicado en 1920"),
+                        .child(self.library_info.rb_published.clone()),
+                )
+        } else {
+            div()
+                .text_sm()
+                .text_color(self.dash_config.muted)
+                .child("Próximamente: un título aleatorio de tu colección.")
+        };
+
         div()
             .w_full()
             .p_5()
@@ -180,42 +218,11 @@ impl Dashboard {
                             .h(px(72.))
                             .flex_shrink_0()
                             .rounded_md()
-                            //.bg(rgb(0x000000))
                             .bg(rgb(self.library_info.rb_cover_color.clone()))
                             .border_1()
                             .border_color(rgb(0xE5E2DC)),
                     )
-                    .child(
-                        div()
-                            .flex()
-                            .flex_col()
-                            .gap_1()
-                            .min_w_0()
-                            .child(
-                                div()
-                                    .text_base()
-                                    .font_weight(FontWeight::SEMIBOLD)
-                                    .text_color(rgb(0x292B29))
-                                    .text_ellipsis()
-                                    //.child("las aventuras de sherlck holmes"),
-                                    .child(self.library_info.rb_title.clone()),
-                            )
-                            .child(
-                                div()
-                                    .text_sm()
-                                    .text_color(rgb(0x34352F))
-                                    .text_ellipsis()
-                                    //.child("Sir Arthur Conan Doyle"),
-                                    .child(self.library_info.r_author.clone()),
-                            )
-                            .child(
-                                div()
-                                    .text_xs()
-                                    .text_color(self.dash_config.muted)
-                                    //.child("Publicado en 1920"),
-                                    .child(self.library_info.rb_published.clone()),
-                            ),
-                    ),
+                    .child(book_info),
             )
     }
 }
