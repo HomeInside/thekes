@@ -290,10 +290,10 @@ impl BookDetailsView {
         //
         self.book_detail.ol_id = book.open_library_id.clone();
         self.book_detail.isbn = book.isbn.clone();
-        //self.book_detail.buy = None; //"No existe enlace de compra".into();
         self.book_detail.buy = book.buy.clone();
         //
-        self.book_detail.created_at = date_utils::date_to_local_string(book.created_at.as_str(), "en");
+        self.book_detail.created_at =
+            date_utils::date_to_local_string(book.created_at.as_str(), "en", "%Y-%m-%d %H:%M:%S");
     }
 }
 

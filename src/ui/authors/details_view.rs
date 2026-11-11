@@ -110,11 +110,12 @@ impl AuthorDetailsView {
         };
 
         // fecha de nacimiento
-        self.author_detail.date_of_birth = date_utils::date_to_local_string(author.date_of_birth.as_str(), "en");
+        self.author_detail.date_of_birth =
+            date_utils::date_to_local_string(author.date_of_birth.as_str(), "en", "%Y-%m-%d");
 
         // fecha de fallecimiento
         self.author_detail.date_of_death = match &author.date_of_death {
-            Some(death_year) => date_utils::date_to_local_string(death_year, "en"),
+            Some(death_year) => date_utils::date_to_local_string(death_year, "en", "%Y-%m-%d"),
             None => "—".to_string(),
         };
 
