@@ -7,12 +7,14 @@ use super::model::StatsModel;
 pub fn stats_counter(conn: &Connection) -> Result<Option<StatsModel>> {
     conn.query_row(
         "WITH random_book AS MATERIALIZED (
-            SELECT b.id, b.title, b.published_date, b.cover_color,
-                   concat(a.name, '', a.last_name) as names
-            FROM books b
-            JOIN authors a ON a.id = b.author_id
-            ORDER BY RANDOM()
-            LIMIT 1
+          SELECT b.id, b.title, b.published_date, b.cover_color,
+            a.name || ' ' || a.last_name AS names
+          FROM books b
+          JOIN authors a ON a.id = b.author_id
+          WHERE b.favorite IS NOT NULL AND b.favorite == 0
+          ORDER BY
+            RANDOM()
+          LIMIT 1
         )
         SELECT
             (SELECT COUNT(id) FROM authors) AS a_count,
