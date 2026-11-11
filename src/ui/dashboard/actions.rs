@@ -16,14 +16,21 @@ impl Dashboard {
                 self.library_info.lang = usize::try_from(stats.lang).unwrap_or(0);
                 self.library_info.quote = stats.quote.clone();
                 //
-                self.library_info.rb_title = stats.rb_title.clone();
-                self.library_info.rb_published = stats.rb_published.clone();
+                self.library_info.rb_title = if let Some(value) = stats.rb_title {
+                    self.library_info.have_r_book = true;
+                    //
+                    value
+                } else {
+                    self.library_info.have_r_book = false;
+                    "-".into()
+                };
+
                 self.library_info.rb_cover_color = match stats.rb_cover_color {
                     Some(value) => u32::try_from(value).unwrap_or(0x000000),
                     None => 0x000000,
                 };
-
-                self.library_info.r_author = stats.r_author.clone();
+                self.library_info.r_author = stats.r_author.clone().unwrap_or("-".into());
+                self.library_info.rb_published = stats.rb_published.clone().unwrap_or("-".into());
             }
             Ok(None) => {
                 let msg = "no se encontra estadísticas";
