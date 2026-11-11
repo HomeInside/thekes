@@ -8,8 +8,8 @@ pub struct StatsModel {
     pub lang: i32,
     pub quote: String,
     //
-    pub rb_title: String,
-    pub rb_published: String,
+    pub rb_title: Option<String>,
+    pub rb_published: Option<String>,
     pub rb_cover_color: Option<u32>,
-    pub r_author: String,
+    pub r_author: Option<String>,
 }
