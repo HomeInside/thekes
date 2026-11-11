@@ -1,8 +1,8 @@
 use rusqlite::{Connection, params};
 use std::error::Error;
 
-pub fn add_default_author(conn: &Connection) -> Result<(), Box<dyn Error>> {
-    println!("add_default_author fn");
+pub fn add_default_data(conn: &Connection) -> Result<(), Box<dyn Error>> {
+    println!("add_default_data fn");
     conn.execute(
         "INSERT INTO authors (
             name, last_name, birth_place, date_of_birth, date_of_death,
@@ -56,6 +56,20 @@ pub fn add_default_author(conn: &Connection) -> Result<(), Box<dyn Error>> {
             Some(0x000000),
             0,
             0
+        ],
+    )?;
+    conn.execute(
+        "INSERT INTO quotes (
+            id, quote_text
+        )
+        SELECT ?1, ?2
+        WHERE NOT EXISTS (
+            SELECT 1 FROM quotes
+            WHERE id = ?1 AND quote_text = ?2
+        )",
+        params![
+            1,
+            "The fool doth think he is wise, but the wise man knows himself to be a fool.",
         ],
     )?;
 

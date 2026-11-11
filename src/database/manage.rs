@@ -1,4 +1,4 @@
-use super::seed::add_default_author;
+use super::seed::add_default_data;
 use crate::utils::file_utils;
 use rusqlite::{Connection, OpenFlags, Result};
 use std::error::Error;
@@ -71,12 +71,17 @@ pub fn init_db(conn: &Connection) -> Result<(), Box<dyn Error>> {
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at TEXT NULL DEFAULT CURRENT_TIMESTAMP
 	);
+	-- quotes
+    CREATE TABLE IF NOT EXISTS quotes(
+        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+        quote_text TEXT NOT NULL
+	);
     ",
     )?;
     conn.execute_batch("COMMIT")?;
 
     // crear data inicial de ejemplo
-    add_default_author(conn)?;
+    add_default_data(conn)?;
 
     Ok(())
 }
