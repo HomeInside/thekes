@@ -199,13 +199,23 @@ impl BookFormView {
         } else {
             String::new()
         };
+
+        let mut new_cover: u32 = 0;
+
         self.errors.err_cover_color = if cover_color.is_empty() {
             String::new()
         } else if cover_color.len() != 8 {
             "El color de portada debe contener 8 caracteres.".into()
         } else {
-            String::new()
+            match self.parse_str_to_color(cover_color.as_str()) {
+                Ok(value) => {
+                    new_cover = value;
+                    String::new()
+                }
+                Err(_) => "El color no se puede convertir a hexadecimal.".into(),
+            }
         };
+
         //
         // TODO validacion END
 
@@ -246,7 +256,7 @@ impl BookFormView {
                 open_library_id: Some(open_library_id),
                 isbn: Some(isbn),
                 buy: Some(buy),
-                //cover_color: Option<u32>,
+                cover_color: Some(new_cover),
                 ..Default::default()
             };
             println!("validate_and_submit book: {:?}", book);
@@ -296,5 +306,11 @@ impl BookFormView {
 
         // limpiar la lista de errores
         self.errors = Default::default();
+    }
+
+    /// convierte un string en un color(0x...) como u32
+    fn parse_str_to_color(&self, s: &str) -> Result<u32, std::num::ParseIntError> {
+        let hex = s.strip_prefix("0x").unwrap_or(s);
+        u32::from_str_radix(hex, 16)
     }
 }

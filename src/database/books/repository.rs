@@ -6,7 +6,7 @@ use super::model::BooksModel;
 #[allow(dead_code)]
 pub fn all_books(conn: &Connection) -> Result<Vec<BooksModel>, Error> {
     let mut stmt = conn.prepare(
-        "SELECT id, title, author_id, published_date, open_library_id, isbn, buy,favorite,current_read FROM books",
+        "SELECT id, title, author_id, published_date, open_library_id, isbn, buy,favorite,current_read, cover_color FROM books",
     )?;
 
     let books_list = stmt.query_map([], |row| {
@@ -20,6 +20,7 @@ pub fn all_books(conn: &Connection) -> Result<Vec<BooksModel>, Error> {
             buy: row.get(6)?,
             favorite: row.get(7)?,
             current_read: row.get(8)?,
+            cover_color: row.get(9)?,
             ..Default::default()
         })
     })?;
@@ -96,7 +97,7 @@ pub fn search_book_by_id(conn: &Connection, item_id: i32) -> Result<Option<Books
 pub fn search_one_book(conn: &Connection, title: &str) -> Result<Vec<BooksModel>, Error> {
     println!("search_one_book fn: {}", title);
     let mut stmt = conn.prepare(
-        "SELECT id, title, author_id, published_date, open_library_id, isbn, buy,favorite,current_read FROM books WHERE title LIKE :title",
+        "SELECT id, title, author_id, published_date, open_library_id, isbn, buy,favorite,current_read, cover_color FROM books WHERE title LIKE :title",
     )?;
     let sql = format!("%{}%", title.trim().to_lowercase());
 
@@ -111,6 +112,7 @@ pub fn search_one_book(conn: &Connection, title: &str) -> Result<Vec<BooksModel>
             buy: row.get(6)?,
             favorite: row.get(7)?,
             current_read: row.get(8)?,
+            cover_color: row.get(9)?,
             ..Default::default()
         })
     })?;
